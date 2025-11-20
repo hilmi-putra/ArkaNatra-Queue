@@ -1,0 +1,145 @@
+
+.dataTables_paginate .paginate_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* jarak antara ikon dan angka */
+}
+
+/* Custom styling untuk memastikan integrasi yang mulus */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    @apply px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white;
+    margin: 8px 4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    @apply px-3 py-2 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-lg hover:bg-orange-700 hover:text-white dark:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600;
+    margin: 8px 4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    @apply px-3 py-2 text-sm font-medium text-gray-300 bg-white border border-gray-200 rounded-lg cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500;
+    margin: 8px 4px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500;
+    margin-right: 16px;
+}
+
+/* Styling dan margin untuk input search */
+.dataTables_wrapper .dataTables_filter {
+    margin: 16px 24px;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500;
+    margin-left: 8px; /* jarak antara label “Search:” dan input */
+}
+
+.dataTables_wrapper .dataTables_info {
+    @apply text-sm text-gray-700 dark:text-neutral-400;
+    margin: 16px;
+}
+
+/* Margin untuk container controls */
+.dataTables_wrapper .dataTables_length {
+    margin: 16px;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    margin: 16px;
+}
+
+/* === Styling utama untuk dropdown "Show entries" === */
+.dataTables_length select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  line-height: 1.25rem;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%233b82f6' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1rem;
+
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+/* Fokus dan hover dengan warna biru */
+.dataTables_length select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  outline: none;
+}
+
+.dataTables_length select:hover {
+  border-color: #3b82f6;
+}
+
+/* === Styling untuk option dropdown === */
+.dataTables_length select option {
+  background-color: #ffffff;
+  color: #1f2937;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 0.5rem;
+}
+
+/* Saat option dihover, difokuskan, atau dipilih */
+.dataTables_length select option:hov    er,
+.dataTables_length select option:focus,
+.dataTables_length select option:checked,
+.dataTables_length select option:active {
+  background-color: #2563eb; /* biru solid */
+  color: #ffffff;
+}
+
+/* Beberapa browser (seperti Chrome) pakai shadow bawaan, kita reset */
+.dataTables_length select option:checked:focus {
+  outline: none;
+}
+
+/* === Wrapper label dan jarak === */
+.dataTables_length {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dataTables_length label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* === Mode dark === */
+.dark .dataTables_length select {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23d1d5db' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.dark .dataTables_length select option {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark .dataTables_length select option:hover,
+.dark .dataTables_length select option:checked {
+  background-color: #2563eb;
+  color: #ffffff;
+}

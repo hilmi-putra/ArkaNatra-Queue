@@ -15,6 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+
+            $table->unsignedBigInteger('id_divisi');
+            $table->foreign('id_divisi')
+                ->references('id')
+                ->on('table_division')
+                ->onDelete('cascade');
+
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
