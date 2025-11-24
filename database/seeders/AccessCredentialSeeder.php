@@ -31,7 +31,6 @@ class AccessCredentialSeeder extends Seeder
 
                 'server' => 'rumahweb',
                 'note' => 'Primary access',
-                'status' => true,
                 'expiration_date' => now()->addMonths(6),
             ],
             [
@@ -55,7 +54,6 @@ class AccessCredentialSeeder extends Seeder
 
                 'server' => 'rumahweb',
                 'note' => 'Backup access',
-                'status' => false,
                 'expiration_date' => now()->addMonths(12),
             ],
         ];

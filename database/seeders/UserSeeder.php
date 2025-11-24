@@ -42,5 +42,15 @@ class UserSeeder extends Seeder
             'id_divisi' => $salesDivisi->id,
         ]);
         $sales->assignRole('sales');
+
+        // Asservice user
+        $asserviceDivisi = DivisionModel::where('name', 'Asservice')->first();
+        $asservice = User::create([
+            'name' => 'Asservice User',
+            'email' => 'asservice@gmail.com',
+            'password' => Hash::make('password'),
+            'id_divisi' => $asserviceDivisi->id,
+        ]);
+        $asservice->assignRole('asservice');
     }
 }

@@ -26,9 +26,8 @@
 
                             @role('admin')
                                 <div class="flex justify-end gap-x-2">
-                                    <!-- Add New Button -->
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                        href="#">
+                                        href="{{ route('admin.indexing-types.create') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -125,10 +124,8 @@
                                                         <div
                                                             class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
                                                             <div class="py-2 first:pt-0 last:pb-0">
-
-
                                                                 <!-- Edit -->
-                                                                <a href="#"
+                                                                <a href="{{ route('admin.indexing-types.edit', $type->id) }}"
                                                                     class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
@@ -139,8 +136,13 @@
                                                                     Edit
                                                                 </a>
 
+                                                                <!-- Delete -->
                                                                 <button type="button"
-                                                                    class="delete-journal-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full">
+                                                                    class="delete-indexing-type-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
+                                                                    data-hs-overlay="#hs-delete-indexing-type-modal"
+                                                                    data-indexing-type-id="{{ $type->id }}"
+                                                                    data-indexing-type-name="{{ $type->indexing_name }}"
+                                                                    data-indexing-type-description="{{ $type->description }}">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
                                                                         viewBox="0 0 16 16">
@@ -151,8 +153,8 @@
                                                                 </button>
 
                                                                 <!-- Detail -->
-                                                                <button type="button"
-                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 w-full hs-view-journal-btn">
+                                                                <a href="{{ route('admin.indexing-types.show', $type->id) }}"
+                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 w-full">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
                                                                         viewBox="0 0 16 16">
@@ -162,7 +164,7 @@
                                                                             d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
                                                                     </svg>
                                                                     Lihat Detail
-                                                                </button>
+                                                                </a>
                                                             </div>
                                                         </div>
                                                     </div>

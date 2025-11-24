@@ -14,7 +14,11 @@ class WorkOrderSeeder extends Seeder
                 'status' => 'pending',
                 'ref_id' => 'WO-001',
                 'customer_id' => 1,
-                'user_id' => 1,
+
+                // NEW: Sales & Production
+                'sales_id' => 1,        // user dengan role sales
+                'production_id' => 1,   // user dengan role production
+
                 'division_id' => 1,
                 'work_type_id' => 1,
                 'domain' => 'customer1.com',
@@ -31,10 +35,14 @@ class WorkOrderSeeder extends Seeder
                 'date_completed' => null,
             ],
             [
-                'status' => 'progress', // FIXED
+                'status' => 'progress',
                 'ref_id' => 'WO-002',
                 'customer_id' => 2,
-                'user_id' => 2,
+
+                // NEW: Sales & Production
+                'sales_id' => 1,        // user dengan role sales
+                'production_id' => 1,   // user dengan role production
+
                 'division_id' => 1,
                 'work_type_id' => 2,
                 'domain' => 'customer2.net',

@@ -19,8 +19,6 @@ class DatabaseSeeder extends Seeder
             WorkTypeSeeder::class,
             IndexingTypeSeeder::class,
 
-            WorkOrderSeeder::class,
-            WorkOrderIndexingSeeder::class,
         ]);
 
     }

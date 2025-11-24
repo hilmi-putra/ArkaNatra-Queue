@@ -59,16 +59,33 @@
     </div>
 </div>
 
+@include('users.components.modal')
+@include('divisions.components.modal')
+@include('work-types.components.modal')
+@include('indexing-types.components.modal')
+@include('work-orders.components.modal')
+
 <script>
-    // Inisialisasi modal HSOverlay
-    document.addEventListener('DOMContentLoaded', function() {
-        // HSOverlay sudah otomatis terinisialisasi jika menggunakan Preline UI
-        // Script ini hanya jika diperlukan inisialisasi manual
-        const overlays = document.querySelectorAll('.hs-overlay');
-        overlays.forEach(overlay => {
-            if (typeof HSOverlay !== 'undefined') {
-                new HSOverlay(overlay);
-            }
+    window.addEventListener('load', () => {
+        // Pastikan semua modal dalam keadaan tertutup (hidden)
+        document.querySelectorAll('.hs-overlay').forEach((el) => {
+            el.classList.add('hidden');
+        });
+
+        // Jangan buka modal otomatis
+        // HSOverlay.open(el); ← dihapus agar tidak auto-open
+
+        // Modal hanya dibuka oleh tombol dengan atribut data-hs-overlay
+        document.querySelectorAll('[data-hs-overlay]').forEach((trigger) => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetSelector = trigger.getAttribute('data-hs-overlay');
+                const modal = document.querySelector(targetSelector);
+
+                if (modal) {
+                    modal.classList.toggle('hidden');
+                }
+            });
         });
     });
 </script>

@@ -24,7 +24,8 @@ return new class extends Migration
                 ->nullable();
 
             $table->text('note')->nullable();
-            $table->boolean('status')->default(true);
+            // Ubah tipe data status dari boolean ke enum
+            $table->enum('status', ['active', 'inactive', 'error', 'suspended', 'expired'])->default('active');
             $table->date('expiration_date')->nullable();
 
             // ➕ Tambahan

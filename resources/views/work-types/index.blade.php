@@ -26,9 +26,11 @@
 
                             @role('admin')
                                 <div class="flex justify-end gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                                        href="#">
-                                        <svg class="size-4" fill="none" stroke="currentColor">
+                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                        href="{{ route('admin.work-types.create') }}">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M5 12h14" />
                                             <path d="M12 5v14" />
                                         </svg>
@@ -161,10 +163,8 @@
                                                         <div
                                                             class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
                                                             <div class="py-2 first:pt-0 last:pb-0">
-
-
                                                                 <!-- Edit -->
-                                                                <a href="#"
+                                                                <a href="{{ route('admin.work-types.edit', $type->id) }}"
                                                                     class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
@@ -175,8 +175,15 @@
                                                                     Edit
                                                                 </a>
 
+                                                                <!-- Delete -->
                                                                 <button type="button"
-                                                                    class="delete-journal-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full">
+                                                                    class="delete-work-type-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
+                                                                    data-hs-overlay="#hs-delete-work-type-modal"
+                                                                    data-work-type-id="{{ $type->id }}"
+                                                                    data-work-type-name="{{ $type->work_type }}"
+                                                                    data-work-type-division="{{ $type->division->name ?? '-' }}"
+                                                                    data-work-type-regular="{{ $type->regular_estimation_days }}"
+                                                                    data-work-type-extra="{{ $type->extra_days_per_quantity }}">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
                                                                         viewBox="0 0 16 16">
@@ -184,20 +191,6 @@
                                                                             d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
                                                                     </svg>
                                                                     Hapus
-                                                                </button>
-
-                                                                <!-- Detail -->
-                                                                <button type="button"
-                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 w-full hs-view-journal-btn">
-                                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                        width="16" height="16" fill="currentColor"
-                                                                        viewBox="0 0 16 16">
-                                                                        <path
-                                                                            d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
-                                                                        <path
-                                                                            d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
-                                                                    </svg>
-                                                                    Lihat Detail
                                                                 </button>
                                                             </div>
                                                         </div>

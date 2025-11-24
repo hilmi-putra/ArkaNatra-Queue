@@ -21,7 +21,18 @@
 
     <!-- Body -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        
+        @role('admin')
+            @include('dashboard.admin')
+        @endrole
+        @role('production')
+            @include('dashboard.production')
+        @endrole
+        @role('sales')
+            @include('dashboard.sales')
+        @endrole
+        @role('asservice')
+            @include('dashboard.asservice')
+        @endrole
     </div>
 
 

@@ -34,6 +34,11 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/update', [ProfileController::class, 'update'])->name('update');
         Route::put('/update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
+
+    // routes/web.php
+Route::get('/work-orders', [WorkOrderController::class, 'index']);
+Route::get('/api/work-orders', [WorkOrderController::class, 'apiWorkOrders']);
+Route::get('/api/work-orders/queue-estimations', [WorkOrderController::class, 'getQueueEstimations']);
 });
 
 Route::middleware(['auth', 'checkrole:admin'])
@@ -45,15 +50,18 @@ Route::middleware(['auth', 'checkrole:admin'])
 
     Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
-    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing_types.index');
+
+    Route::resource('indexing-types', IndexingTypeController::class);
     
-    // Users Resource Routes
     Route::resource('users', UserController::class);
-    
+
+    Route::resource('divisions', DivisionController::class);
+
+    Route::resource('work-orders', WorkOrderController::class);
+
     Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work_order_indexing.index');
-    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work_orders.index');
-    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work_types.index');
+    
+    Route::resource('work-types', WorkTypeController::class);
 });
 
 Route::middleware(['auth', 'checkrole:production'])
@@ -66,11 +74,13 @@ Route::middleware(['auth', 'checkrole:production'])
     Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
-    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing_types.index');
+    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing-types.index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work_order_indexing.index');
-    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work_orders.index');
-    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work_types.index');
+    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
+
+    Route::resource('work-orders', WorkOrderController::class);
+
+    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });
 
 Route::middleware(['auth', 'checkrole:sales'])
@@ -86,6 +96,25 @@ Route::middleware(['auth', 'checkrole:sales'])
     Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing_types.index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work_order_indexing.index');
-    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work_orders.index');
-    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work_types.index');
+    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
+});
+
+Route::middleware(['auth', 'checkrole:asservice'])
+->prefix('asservice')
+->name('asservice.')
+->group(function () {
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('work-orders', WorkOrderController::class);
+
+    Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
+    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing-types.index');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
+    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });

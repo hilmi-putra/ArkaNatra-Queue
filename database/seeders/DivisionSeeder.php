@@ -13,5 +13,6 @@ class DivisionSeeder extends Seeder
         DivisionModel::create(['name' => 'Administration']);
         DivisionModel::create(['name' => 'Production']);
         DivisionModel::create(['name' => 'Sales']);
+        DivisionModel::create(['name' => 'Asservice']);
     }
 }

@@ -12,16 +12,20 @@
             @php $prefix = 'production.'; @endphp
         @elseif ($role === 'sales')
             @php $prefix = 'sales.'; @endphp
+        @elseif ($role === 'asservice')
+            @php $prefix = 'asservice.'; @endphp
         @else
             @php $prefix = ''; @endphp
         @endif
+
         <div class="w-full flex items-center gap-x-1.5">
             <ul class="flex items-center gap-1.5">
                 <li
                     class="inline-flex items-center relative text-gray-200 pe-1.5 last:pe-0 last:after:hidden after:absolute after:top-1/2 after:end-0 after:inline-block after:w-px after:h-3.5 after:bg-gray-300 after:rounded-full after:-translate-y-1/2 after:rotate-12 dark:text-neutral-200 dark:after:bg-neutral-700">
                     <a class="shrink-0 inline-flex justify-center items-center bg-gray-200 size-8 rounded-md text-xl inline-block font-semibold focus:outline-hidden focus:opacity-80"
                         href="{{ route($prefix . 'dashboard') }}" aria-label="Preline">
-                        <img src="https://res.cloudinary.com/dhjqjn2hn/image/upload/v1763543841/logo-arka_nvpc2s.png" alt="" class="shrink-0 size-8" width="36" height="36" >
+                        <img src="https://res.cloudinary.com/dhjqjn2hn/image/upload/v1763543841/logo-arka_nvpc2s.png"
+                            alt="" class="shrink-0 size-8" width="36" height="36">
                     </a>
 
                     <div class="hidden sm:block ms-1">

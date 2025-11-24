@@ -21,10 +21,10 @@
                                     relasinya.</p>
                             </div>
 
-                            @role('admin')
+                            @role('asservice')
                                 <div class="flex justify-end gap-x-2">
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                        href="#">
+                                        href="{{ route('asservice.work-orders.create') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="16"
                                             height="16" fill="currentColor" viewBox="0 0 16 16">
                                             <path
@@ -60,6 +60,14 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span
+                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Antrian
+                                                    Ke</span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span
                                                     class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Customer</span>
                                             </div>
                                         </th>
@@ -67,23 +75,18 @@
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">PIC
-                                                    User</span>
+                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
+                                                    Marketing
+                                                </span>
                                             </div>
                                         </th>
 
                                         <th scope="col" class="px-6 py-3 text-start">
                                             <div class="flex items-center gap-x-2">
                                                 <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Division</span>
-                                            </div>
-                                        </th>
-
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Work
-                                                    Type</span>
+                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
+                                                    Production
+                                                </span>
                                             </div>
                                         </th>
 
@@ -98,6 +101,21 @@
                                             <div class="flex items-center gap-x-2">
                                                 <span
                                                     class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Qty</span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span
+                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Estimasi</span>
+                                            </div>
+                                        </th>
+
+                                        <th scope="col" class="px-6 py-3 text-start">
+                                            <div class="flex items-center gap-x-2">
+                                                <span
+                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Fast
+                                                    Track</span>
                                             </div>
                                         </th>
 
@@ -146,6 +164,15 @@
                                                 </div>
                                             </td>
 
+                                            <!-- Antrian Ke -->
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                                        {{ $loop->iteration }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
                                             <!-- Customer -->
                                             <td class="size-px whitespace-nowrap">
                                                 <div class="px-6 py-3">
@@ -159,25 +186,16 @@
                                             <td class="size-px whitespace-nowrap">
                                                 <div class="px-6 py-3">
                                                     <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->user->name ?? '-' }}
+                                                        {{ $order->salesUser->name ?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
 
-                                            <!-- Division -->
+                                            <!-- PIC User -->
                                             <td class="size-px whitespace-nowrap">
                                                 <div class="px-6 py-3">
                                                     <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->division->name ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Work Type -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->workType->work_type ?? '-' }}
+                                                        {{ $order->productionUser->name ?? '-' }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -231,6 +249,35 @@
                                                 </div>
                                             </td>
 
+                                            <!-- Estimasi -->
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span class="text-sm text-gray-700 dark:text-neutral-300"
+                                                        title="Estimasi: {{ $order->calculated_estimation_days }} hari">
+                                                        {{ $order->calculated_estimation ?? '-' }}
+                                                    </span>
+                                                    @if ($order->calculated_estimation != $order->estimasi_date)
+                                                        <span class="text-xs text-orange-500 ml-1"
+                                                            title="Estimasi terupdate">
+                                                            ↆ
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                            <!-- Info Tambahan -->
+                                            <td class="size-px whitespace-nowrap">
+                                                <div class="px-6 py-3">
+                                                    <span
+                                                        class="text-xs {{ $order->fast_track ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }} px-2 py-1 rounded-full">
+                                                        {{ $order->fast_track ? 'Fast Track' : 'Regular' }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500 ml-1">
+                                                        {{ $order->calculated_estimation_days }} hari
+                                                    </span>
+                                                </div>
+                                            </td>
+
                                             <!-- Date Received -->
                                             <td class="size-px whitespace-nowrap">
                                                 <div class="px-6 py-3">
@@ -267,8 +314,22 @@
                                                         <div
                                                             class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
                                                             <div class="py-2 first:pt-0 last:pb-0">
-                                                                <!-- Detail -->
-                                                                <a href="#"
+
+                                                                @php
+                                                                    $role = auth()->user()->getRoleNames()->first();
+                                                                    $prefix = '';
+
+                                                                    if ($role === 'admin') {
+                                                                        $prefix = 'admin.';
+                                                                    } elseif ($role === 'production') {
+                                                                        $prefix = 'production.';
+                                                                    } elseif ($role === 'sales') {
+                                                                        $prefix = 'sales.';
+                                                                    } elseif ($role === 'asservice') {
+                                                                        $prefix = 'asservice.';
+                                                                    }
+                                                                @endphp
+                                                                <a href="{{ route($prefix .'work-orders.show', $order->id) }}"
                                                                     class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
@@ -279,9 +340,9 @@
                                                                     Detail
                                                                 </a>
 
-                                                                @role('admin')
+                                                                @role('asservice')
                                                                     <!-- Edit -->
-                                                                    <a href="#"
+                                                                    <a href="{{ route('asservice.work-orders.edit', $order->id) }}"
                                                                         class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
                                                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                             width="16" height="16" fill="currentColor"
@@ -292,9 +353,17 @@
                                                                         Edit
                                                                     </a>
 
-                                                                    <!-- Delete -->
+                                                                    <!-- Button Delete Baru -->
                                                                     <button type="button"
-                                                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full">
+                                                                        class="delete-workorder-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
+                                                                        data-workorder-id="{{ $order->id }}"
+                                                                        data-ref-id="{{ $order->ref_id }}"
+                                                                        data-customer="{{ $order->customer->name }}"
+                                                                        data-division="{{ $order->division->name ?? '-' }}"
+                                                                        data-worktype="{{ $order->workType->work_type ?? '-' }}"
+                                                                        data-status="{{ $order->status }}"
+                                                                        data-queue="{{ $order->antrian_ke }}"
+                                                                        data-hs-overlay="#hs-delete-workorder-modal">
                                                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                             width="16" height="16" fill="currentColor"
                                                                             viewBox="0 0 16 16">
@@ -346,3 +415,52 @@
     <!-- End Page Wrapper -->
 
 @endsection
+
+<script>
+    // resources/js/work-queue.js
+    class WorkQueueUpdater {
+        constructor() {
+            this.updateInterval = 30000; // 30 detik
+            this.init();
+        }
+
+        init() {
+            this.loadQueueData();
+            setInterval(() => this.loadQueueData(), this.updateInterval);
+        }
+
+        async loadQueueData() {
+            try {
+                const response = await fetch('/api/work-orders/queue-estimations');
+                const data = await response.json();
+
+                if (data.success) {
+                    this.updateUI(data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching queue data:', error);
+            }
+        }
+
+        updateUI(orders) {
+            orders.forEach(order => {
+                // Update estimasi di UI
+                const estimasiElement = document.querySelector(
+                    `[data-order-id="${order.id}"] .estimasi-date`);
+                if (estimasiElement) {
+                    estimasiElement.textContent = order.estimated_date;
+
+                    // Highlight jika berbeda dengan database
+                    if (order.estimated_date !== order.current_estimasi_date) {
+                        estimasiElement.classList.add('text-orange-600', 'font-semibold');
+                    }
+                }
+            });
+        }
+    }
+
+    // Inisialisasi
+    document.addEventListener('DOMContentLoaded', function() {
+        new WorkQueueUpdater();
+    });
+</script>
