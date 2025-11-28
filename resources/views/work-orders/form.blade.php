@@ -10,9 +10,24 @@
                 </h2>
             </div>
 
+            @php
+                $role = auth()->user()->getRoleNames()->first();
+                $prefix = '';
+
+                if ($role === 'admin') {
+                    $prefix = 'admin.';
+                } elseif ($role === 'production') {
+                    $prefix = 'production.';
+                } elseif ($role === 'sales') {
+                    $prefix = 'sales.';
+                } elseif ($role === 'asservice') {
+                    $prefix = 'asservice.';
+                }
+            @endphp
+
             <div class="p-6">
                 <form
-                    action="{{ isset($workOrder) ? route('asservice.work-orders.update', $workOrder->id) : route('asservice.work-orders.store') }}"
+                    action="{{ isset($workOrder) ? route($prefix . 'work-orders.update', $workOrder->id) : route($prefix . 'work-orders.store') }}"
                     method="POST" enctype="multipart/form-data" class="space-y-8">
                     @csrf
                     @if (isset($workOrder))
@@ -152,6 +167,16 @@
                                     @error('customer_address')
                                         <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                                     @enderror
+                                </div>
+
+                                <!-- Customer Token (Read-only) - Only for new customer form display -->
+                                <div id="token-field" class="sm:col-span-2 hidden">
+                                    <label for="customer_token" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Token <span class="text-gray-500 text-xs">(Auto-generated)</span>
+                                    </label>
+                                    <input type="text" id="customer_token" readonly
+                                        class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm bg-gray-100 cursor-not-allowed text-gray-600"
+                                        placeholder="Token akan ditampilkan setelah customer dipilih">
                                 </div>
                             </div>
                         </div>
@@ -427,6 +452,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+
                                 @error('division_id')
                                     <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                                 @enderror
@@ -443,6 +469,8 @@
                                     <option value="">Pilih Jenis Pekerjaan</option>
                                     @foreach ($workTypes as $workType)
                                         <option value="{{ $workType->id }}"
+                                            data-division-id="{{ $workType->division_id ?? '' }}"
+                                            data-division-name="{{ $workType->division?->name ?? '' }}"
                                             {{ old('work_type_id', isset($workOrder) ? $workOrder->work_type_id : '') == $workType->id ? 'selected' : '' }}>
                                             {{ $workType->work_type }}
                                         </option>
@@ -845,5 +873,61 @@
                 fastTrackText.textContent = 'OFF';
             }
         });
+    });
+</script>
+
+<!-- JavaScript for Work Type to Division Auto-fill -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const workTypeSelect = document.getElementById('work_type_id');
+        const divisionSelect = document.getElementById('division_id');
+        const workTypeDivisionMap = @json($workTypeDivisionMap ?? []);
+
+        // Debug: Log the mapping
+        console.log('Work Type Division Map:', workTypeDivisionMap);
+
+        /**
+         * Auto-fill Division berdasarkan Work Type yang dipilih
+         */
+        function autoFillDivision() {
+            const selectedWorkTypeId = workTypeSelect.value;
+            console.log('Selected Work Type ID:', selectedWorkTypeId);
+
+            if (selectedWorkTypeId && workTypeDivisionMap[selectedWorkTypeId]) {
+                const divisionId = workTypeDivisionMap[selectedWorkTypeId].division_id;
+                const divisionName = workTypeDivisionMap[selectedWorkTypeId].division_name;
+
+                console.log('Division ID:', divisionId, 'Division Name:', divisionName);
+
+                // Set division select ke division_id yang sesuai
+                if (divisionId) {
+                    divisionSelect.value = divisionId;
+                    console.log('Division set to:', divisionSelect.value);
+
+                    // Trigger change event untuk update UI jika ada
+                    divisionSelect.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                } else {
+                    // Jika tidak ada division, reset ke default
+                    divisionSelect.value = '';
+                    console.log('No division ID found, resetting to empty');
+                }
+            } else {
+                // Jika tidak ada work type yang dipilih atau tidak ada mapping, reset division
+                divisionSelect.value = '';
+                console.log('No work type selected or no mapping found, resetting to empty');
+            }
+        }
+
+        // Event listener untuk perubahan work type
+        workTypeSelect.addEventListener('change', function() {
+            console.log('Work type changed');
+            autoFillDivision();
+        });
+
+        // Initialize auto-fill saat page load (untuk edit mode)
+        console.log('Initializing auto-fill on page load');
+        autoFillDivision();
     });
 </script>

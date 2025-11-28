@@ -19,6 +19,8 @@ return new class extends Migration
             'revision', 'migration', 'finish'
         ])->default('validate');
 
+        $table->boolean('send_access')->default(false);
+
         $table->string('ref_id')->nullable();
         $table->integer('antrian_ke')->nullable();
 
@@ -67,11 +69,13 @@ return new class extends Migration
 
         $table->boolean('fast_track')->default(false);
 
-        $table->dateTime('date_received')->nullable();
-        $table->dateTime('date_queue')->nullable();
-        $table->dateTime('date_revision')->nullable();
+        $table->date('date_received')->nullable();
+        $table->date('date_queue')->nullable();
+        $table->date('estimasi_date')->nullable();
+        $table->date('date_revision')->nullable();
+        $table->date('date_migration')->nullable();
         $table->integer('revision_count')->default(0);
-        $table->dateTime('date_completed')->nullable();
+        $table->date('date_completed')->nullable();
 
         $table->timestamps();
         $table->softDeletes();

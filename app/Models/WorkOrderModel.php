@@ -4,21 +4,128 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class WorkOrderModel extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected $table = 'table_work_orders';
 
     protected $fillable = [
-        'status', 'ref_id', 'customer_id', 
+        'status', 'send_access', 'ref_id', 'antrian_ke', 'customer_id', 
         'division_id', 'work_type_id', 'domain', 'quantity',
         'description', 'file_mou', 'file_work_form',
         'additional_file', 'fast_track', 'date_received',
         'date_queue', 'revision_count',
-        'date_completed', 'estimasi_date', 'sales_id', 'production_id'
+        'date_completed', 'estimasi_date', 'sales_id', 'production_id', 'date_revision', 'date_migration'
     ];
+
+    protected $dates = [
+        'estimasi_date',
+        'date_received',
+        'date_queue',
+        'date_completed',
+        'date_revision',
+        'date_migration',   
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
+     * Scope untuk mendapatkan work orders berdasarkan production_id
+     */
+    public function scopeByProduction($query, $productionId)
+    {
+        return $query->where('production_id', $productionId);
+    }
+
+    /**
+     * Scope untuk work orders dalam antrian
+     */
+    public function scopeInQueue($query)
+    {
+        return $query->where('status', 'queue');
+    }
+
+    /**
+     * Mendapatkan jumlah antrian untuk production_id tertentu
+     */
+    public static function getQueueCount($productionId)
+    {
+        return self::where('status', 'queue')
+            ->where('production_id', $productionId)
+            ->count();
+    }
+
+    /**
+     * Mendapatkan daftar antrian untuk production_id tertentu
+     */
+    public static function getQueueList($productionId)
+    {
+        return self::where('status', 'queue')
+            ->where('production_id', $productionId)
+            ->orderBy('antrian_ke', 'asc')
+            ->get();
+    }
+
+    /**
+     * Format a date to Indonesian format (Day, dd Month YYYY).
+     */
+    private function formatIndonesianDate($date)
+    {
+        if (is_null($date)) {
+            return null;
+        }
+        return Carbon::parse($date)->translatedFormat('l, d F Y');
+    }
+
+    // ... (getter methods yang sudah ada tetap dipertahankan)
+
+    public function getDateRevisionAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getDateMigrationAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getEstimasiDateAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+    
+    public function getDateReceivedAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getDateQueueAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getDateCompletedAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
+
+    // ... (relationship methods yang sudah ada)
 
     public function customer() 
     { 
@@ -39,7 +146,6 @@ class WorkOrderModel extends Model
     {
         return $this->belongsTo(User::class, 'production_id');
     }
-
     
     public function division() 
     { 
@@ -53,82 +159,23 @@ class WorkOrderModel extends Model
 
     public function accessCredentials()
     {
-        // Relasi melalui customer, bukan langsung
         return $this->hasManyThrough(
             AccessCredentialModel::class,
             CustomerModel::class,
-            'id', // Foreign key on CustomerModel
-            'customer_id', // Foreign key on AccessCredentialModel
-            'customer_id', // Local key on WorkOrderModel
-            'id' // Local key on CustomerModel
+            'id',
+            'customer_id',
+            'customer_id',
+            'id'
         );
     }
 
-    // Atau alternatif: ambil access credentials melalui customer
     public function getAccessCredentialsAttribute()
     {
         return $this->customer->accessCredentials ?? collect();
     }
 
-     /**
-     * Accessor untuk estimasi yang dihitung otomatis
-     */
-    public function getCalculatedEstimationAttribute()
+    public function accessCredential()
     {
-        return $this->calculateEstimation();
-    }
-
-    /**
-     * Accessor untuk estimasi dalam hari
-     */
-    public function getCalculatedEstimationDaysAttribute()
-    {
-        return $this->calculateEstimationDays();
-    }
-
-    /**
-     * Hitung estimasi dalam hari
-     */
-    public function calculateEstimationDays()
-    {
-        if (!$this->workType) {
-            return 0;
-        }
-
-        $workType = $this->workType;
-        $quantity = $this->quantity ?? 1;
-        
-        $baseEstimation = $this->fast_track 
-            ? $workType->fast_track_estimation_days 
-            : $workType->regular_estimation_days;
-
-        $extraDays = ($quantity - 1) * ($workType->extra_days_per_quantity ?? 0);
-
-        return $baseEstimation + $extraDays;
-    }
-
-    /**
-     * Hitung tanggal estimasi
-     */
-    public function calculateEstimation()
-    {
-        if ($this->status !== 'queue' || !$this->date_queue) {
-            return $this->estimasi_date;
-        }
-
-        $estimationDays = $this->calculateEstimationDays();
-        
-        if ($estimationDays <= 0) {
-            return $this->estimasi_date;
-        }
-
-        try {
-            $queueDate = \Carbon\Carbon::parse($this->date_queue);
-            $estimatedDate = $queueDate->addDays($estimationDays);
-            
-            return $estimatedDate->format('Y-m-d');
-        } catch (\Exception $e) {
-            return $this->estimasi_date;
-        }
-    }
+        return $this->hasOne(AccessCredentialModel::class, 'customer_id', 'customer_id');
+    }       
 }

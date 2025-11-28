@@ -64,6 +64,8 @@
 @include('work-types.components.modal')
 @include('indexing-types.components.modal')
 @include('work-orders.components.modal')
+@include('customers.components.modal')
+@include('access-credentials.components.modal')
 
 <script>
     window.addEventListener('load', () => {

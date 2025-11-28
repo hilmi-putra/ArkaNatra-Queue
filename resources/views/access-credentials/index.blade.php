@@ -1,5 +1,16 @@
 @extends('layouts.app')
 
+@php
+    $role = auth()->user()->getRoleNames()->first();
+    $prefix = match ($role) {
+        'admin' => 'admin.',
+        'production' => 'production.',
+        'sales' => 'sales.',
+        'asservice' => 'asservice.',
+        default => '',
+    };
+@endphp
+
 @section('content')
 
     <!-- Page Wrapper -->
@@ -21,21 +32,19 @@
                                     client.</p>
                             </div>
 
-                            @role('admin')
-                                <div class="flex justify-end gap-x-2">
-                                    <!-- Add New Button -->
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                                        href="#">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14" />
-                                            <path d="M12 5v14" />
-                                        </svg>
-                                        Tambah Access Credentials
-                                    </a>
-                                </div>
-                            @endrole
+                            <div class="flex justify-end gap-x-2">
+                                <!-- Add New Button -->
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    href="{{ route($prefix . 'access-credentials.create') }}">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14" />
+                                        <path d="M12 5v14" />
+                                    </svg>
+                                    Tambah Access Credentials
+                                </a>
+                            </div>
                         </div>
                         <!-- End Header -->
 
@@ -496,36 +505,27 @@
                                                         <div
                                                             class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
                                                             <div class="py-2 first:pt-0 last:pb-0">
-                                                                <!-- Detail -->
-                                                                <a href="#"
-                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700">
+                                                                <!-- Edit -->
+                                                                <a href="{{ route($prefix . 'access-credentials.edit', $credential->id) }}"
+                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
                                                                         viewBox="0 0 16 16">
                                                                         <path
-                                                                            d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
-                                                                        <path
-                                                                            d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
+                                                                            d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
                                                                     </svg>
-                                                                    Detail
+                                                                    Edit
                                                                 </a>
 
                                                                 @role('admin')
-                                                                    <!-- Edit -->
-                                                                    <a href="#"
-                                                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
-                                                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                            width="16" height="16" fill="currentColor"
-                                                                            viewBox="0 0 16 16">
-                                                                            <path
-                                                                                d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
-                                                                        </svg>
-                                                                        Edit
-                                                                    </a>
-
                                                                     <!-- Delete -->
                                                                     <button type="button"
-                                                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full">
+                                                                        class="delete-credential-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
+                                                                        data-hs-overlay="#hs-delete-credential-modal"
+                                                                        data-credential-id="{{ $credential->id }}"
+                                                                        data-credential-customer="{{ $credential->customer->name ?? '-' }}"
+                                                                        data-credential-server="{{ $credential->server ?? '-' }}"
+                                                                        data-credential-status="{{ $credential->status ?? '-' }}">
                                                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                             width="16" height="16" fill="currentColor"
                                                                             viewBox="0 0 16 16">
@@ -598,5 +598,7 @@
             });
         });
     </script>
+
+
 
 @endsection

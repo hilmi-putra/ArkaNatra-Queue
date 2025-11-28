@@ -1,7 +1,7 @@
-<!-- Delete Work Order Modal -->
-<div id="hs-delete-workorder-modal"
+<!-- Delete Customer Modal -->
+<div id="hs-delete-customer-modal"
     class="hs-overlay hidden size-full fixed top-0 start-0 z-80 overflow-x-hidden overflow-y-auto" role="dialog"
-    tabindex="-1" aria-labelledby="hs-delete-workorder-modal-label">
+    tabindex="-1" aria-labelledby="hs-delete-customer-modal-label">
 
     <!-- WRAPPER utama Preline -->
     <div
@@ -14,7 +14,7 @@
             <div class="absolute top-2 end-2">
                 <button type="button"
                     class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-400 dark:focus:bg-neutral-600"
-                    aria-label="Close" data-hs-overlay="#hs-delete-workorder-modal">
+                    aria-label="Close" data-hs-overlay="#hs-delete-customer-modal">
                     <span class="sr-only">Close</span>
                     <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -38,43 +38,29 @@
                     </span>
 
                     <div class="grow">
-                        <h3 id="hs-delete-workorder-modal-label"
+                        <h3 id="hs-delete-customer-modal-label"
                             class="mb-2 text-xl font-bold text-gray-800 dark:text-neutral-200">
-                            Konfirmasi Penghapusan Work Order
+                            Konfirmasi Penghapusan Customer
                         </h3>
                         <p class="text-gray-500 dark:text-neutral-500 mb-4">
-                            Apakah Anda yakin ingin menghapus work order berikut?
+                            Apakah Anda yakin ingin menghapus data customer berikut?
                         </p>
 
                         <div class="text-sm bg-gray-50 dark:bg-neutral-800 p-4 rounded-lg mb-4 space-y-3">
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Ref ID:</span>
+                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Nama:</span>
                                 <span class="font-semibold text-gray-800 dark:text-neutral-200"
-                                    id="modal-workorder-refid">—</span>
+                                    id="modal-customer-name">—</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Customer:</span>
-                                <span class="font-medium text-gray-800 dark:text-neutral-200"
-                                    id="modal-workorder-customer">—</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Divisi:</span>
+                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Token:</span>
                                 <span class="font-medium text-blue-600 dark:text-blue-400"
-                                    id="modal-workorder-division">—</span>
+                                    id="modal-customer-token">—</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Jenis Pekerjaan:</span>
+                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Email:</span>
                                 <span class="font-medium text-gray-800 dark:text-neutral-200"
-                                    id="modal-workorder-worktype">—</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Status:</span>
-                                <span class="font-medium" id="modal-workorder-status">—</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600 dark:text-neutral-400 font-medium">Antrian:</span>
-                                <span class="font-medium text-orange-600 dark:text-orange-400"
-                                    id="modal-workorder-queue">—</span>
+                                    id="modal-customer-email">—</span>
                             </div>
                         </div>
 
@@ -93,8 +79,7 @@
                                 <div class="text-sm">
                                     <span class="font-semibold text-yellow-800 dark:text-yellow-600">Peringatan:</span>
                                     <p class="text-yellow-700 dark:text-yellow-500 mt-1">
-                                        Semua data work order, akses credentials, dan file terkait akan dihapus secara
-                                        permanen dan tidak dapat dikembalikan.
+                                        Semua data terkait customer ini akan dihapus secara permanen.
                                     </p>
                                 </div>
                             </div>
@@ -104,16 +89,15 @@
                 </div>
             </div>
 
-            <form id="delete-workorder-form" method="POST" action="">
+            <form id="delete-customer-form" method="POST" action="">
                 @csrf
                 @method('DELETE')
-                <input type="hidden" name="workorder_id" id="workorder-id-input">
 
                 <div
                     class="flex justify-end items-center gap-x-2 py-3 px-4 bg-gray-50 border-t border-gray-200 dark:bg-neutral-950 dark:border-neutral-800">
                     <button type="button"
                         class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50"
-                        data-hs-overlay="#hs-delete-workorder-modal">
+                        data-hs-overlay="#hs-delete-customer-modal">
                         Batal
                     </button>
                     <button type="submit"
@@ -133,9 +117,6 @@
     </div>
 </div>
 
-<!-- Include Modals -->
-@include('work-orders.components.modal-send-access')
-@include('work-orders.components.modal-send-email')
 
 <script>
     window.addEventListener('load', () => {
@@ -147,68 +128,27 @@
         }, 100);
 
         // Logic to handle delete modal data
-        const deleteButtons = document.querySelectorAll('.delete-workorder-btn');
-        const modalRefId = document.getElementById('modal-workorder-refid');
-        const modalCustomer = document.getElementById('modal-workorder-customer');
-        const modalDivision = document.getElementById('modal-workorder-division');
-        const modalWorkType = document.getElementById('modal-workorder-worktype');
-        const modalStatus = document.getElementById('modal-workorder-status');
-        const modalQueue = document.getElementById('modal-workorder-queue');
-        const deleteForm = document.getElementById('delete-workorder-form');
-        const workorderIdInput = document.getElementById('workorder-id-input');
+        const deleteButtons = document.querySelectorAll('.delete-customer-btn');
+        const modalCustomerName = document.getElementById('modal-customer-name');
+        const modalCustomerToken = document.getElementById('modal-customer-token');
+        const modalCustomerEmail = document.getElementById('modal-customer-email');
+        const deleteForm = document.getElementById('delete-customer-form');
 
         deleteButtons.forEach(button => {
             button.addEventListener('click', () => {
-                const workorderId = button.getAttribute('data-workorder-id');
-                const refId = button.getAttribute('data-ref-id');
-                const customer = button.getAttribute('data-customer');
-                const division = button.getAttribute('data-division');
-                const workType = button.getAttribute('data-worktype');
-                const status = button.getAttribute('data-status');
-                const queue = button.getAttribute('data-queue');
+                const customerId = button.getAttribute('data-customer-id');
+                const customerName = button.getAttribute('data-customer-name');
+                const customerToken = button.getAttribute('data-customer-token');
+                const customerEmail = button.getAttribute('data-customer-email');
 
-                // Populate modal with work order data
-                modalRefId.textContent = refId;
-                modalCustomer.textContent = customer;
-                modalDivision.textContent = division;
-                modalWorkType.textContent = workType;
-                modalQueue.textContent = `#${queue}`;
-                workorderIdInput.value = workorderId;
-
-                // Set status dengan badge styling
-                const statusMap = {
-                    'validate': {
-                        text: 'Validasi',
-                        class: 'bg-green-100 text-green-800'
-                    },
-                    'pending': {
-                        text: 'Pending',
-                        class: 'bg-yellow-100 text-yellow-800'
-                    },
-                    'completed': {
-                        text: 'Selesai',
-                        class: 'bg-blue-100 text-blue-800'
-                    },
-                    'revision': {
-                        text: 'Revisi',
-                        class: 'bg-red-100 text-red-800'
-                    },
-                    'in_progress': {
-                        text: 'Dalam Proses',
-                        class: 'bg-purple-100 text-purple-800'
-                    }
-                };
-
-                const statusInfo = statusMap[status] || {
-                    text: status,
-                    class: 'bg-gray-100 text-gray-800'
-                };
-                modalStatus.innerHTML =
-                    `<span class="px-2 py-1 text-xs font-medium rounded-full ${statusInfo.class}">${statusInfo.text}</span>`;
+                // Populate modal with customer data
+                modalCustomerName.textContent = customerName;
+                modalCustomerToken.textContent = customerToken;
+                modalCustomerEmail.textContent = customerEmail;
 
                 // Set the form action URL
-                let baseUrl = "{{ url('asservice/work-orders') }}";
-                deleteForm.action = `${baseUrl}/${workorderId}`;
+                let baseUrl = "{{ url('admin/customers') }}";
+                deleteForm.action = `${baseUrl}/${customerId}`;
             });
         });
     });

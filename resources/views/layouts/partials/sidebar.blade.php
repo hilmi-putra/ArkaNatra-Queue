@@ -282,8 +282,8 @@ dark:bg-neutral-900"
 
                     <!-- Access Credentials -->
                     <li>
-                        @php $isActive = request()->routeIs($prefix . 'access_credentials.index'); @endphp
-                        <a href="{{ route($prefix . 'access_credentials.index') }}"
+                        @php $isActive = request()->routeIs($prefix . 'access-credentials.index'); @endphp
+                        <a href="{{ route($prefix . 'access-credentials.index') }}"
                             class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 dark:text-neutral-200 dark:hover:bg-neutral-800 {{ $isActive ? 'active-link' : '' }}">
                             <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"

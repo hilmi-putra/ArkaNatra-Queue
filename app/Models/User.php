@@ -53,11 +53,6 @@ class User extends Authenticatable
         return $this->belongsTo(DivisionModel::class, 'id_divisi');
     }
 
-    public function workOrders()
-    {
-        return $this->hasMany(WorkOrderModel::class, 'user_id');
-    }
-
     public function isAdmin()
     {
         return $this->role === 'admin';

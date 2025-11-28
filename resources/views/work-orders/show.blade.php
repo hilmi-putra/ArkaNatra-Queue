@@ -10,18 +10,6 @@
                     <p class="text-gray-600 dark:text-gray-400 mt-1">Informasi lengkap work order dan data terkait</p>
                 </div>
                 <div class="flex gap-2">
-                    @role('asservice')
-                        <a href="{{ route('asservice.work-orders.edit', $workOrder->id) }}"
-                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z" />
-                            </svg>
-                            Edit
-                        </a>
-                    @endrole
-
                     @php
                         $role = auth()->user()->getRoleNames()->first();
                         $prefix = '';
@@ -37,7 +25,19 @@
                         }
                     @endphp
 
-                    <a href="{{ route($prefix .'work-orders.index') }}"
+                    @hasanyrole('asservice|production')
+                        <a href="{{ route($prefix . 'work-orders.edit', $workOrder->id) }}"
+                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                fill="currentColor" viewBox="0 0 16 16">
+                                <path
+                                    d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z" />
+                            </svg>
+                            Edit
+                        </a>
+                    @endhasanyrole
+
+                    <a href="{{ route($prefix . 'work-orders.index') }}"
                         class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                             fill="currentColor" viewBox="0 0 16 16">
@@ -115,7 +115,7 @@
                                 <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Estimasi
                                     Selesai</label>
                                 <p class="text-sm text-gray-900 dark:text-white">
-                                    {{ \Carbon\Carbon::parse($workOrder->estimasi_date)->format('d M Y') }}
+                                    {{ $workOrder->estimasi_date ?? '-' }}
                                 </p>
                             </div>
                             <div>
@@ -195,6 +195,43 @@
                         class="bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-800 dark:border-neutral-700">
                         <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Data Akses</h2>
+
+                            <!-- Action Buttons -->
+                            @if ($workOrder->status === 'finish')
+                                <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                                    <!-- Send Access Button -->
+                                    <button type="button"
+                                        class="py-2.5 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                        data-hs-overlay="#hs-send-access-modal" data-workorder-id="{{ $workOrder->id }}"
+                                        data-credential-web="{{ $workOrder->accessCredential->access_web ?? null }}"
+                                        data-credential-ojs="{{ $workOrder->accessCredential->akses_ojs ?? null }}"
+                                        data-credential-cpanel="{{ $workOrder->accessCredential->akses_cpanel ?? null }}"
+                                        data-credential-webmail="{{ $workOrder->accessCredential->akses_webmail ?? null }}"
+                                        {{ $workOrder->send_access ? 'disabled' : '' }}>
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m22 2-7 20-4-9-9-4Z" />
+                                            <path d="M22 2 11 13" />
+                                        </svg>
+                                        {{ $workOrder->send_access ? 'Akses Terkirim' : 'Kirim Akses' }}
+                                    </button>
+
+                                    <!-- Send to Email Button -->
+                                    <button type="button"
+                                        class="send-email-btn py-2.5 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
+                                        data-hs-overlay="#hs-send-email-modal" data-workorder-id="{{ $workOrder->id }}"
+                                        {{ !$workOrder->send_access ? 'disabled' : '' }}>
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect width="20" height="16" x="2" y="4" rx="2" />
+                                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                        </svg>
+                                        Kirim ke Email
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                         <div class="p-6 space-y-4">
                             @foreach ($workOrder->customer->accessCredentials as $credential)
@@ -503,15 +540,13 @@
                                         </div>
                                     </div>
                                 @endif
-
-                                @if ($credential->note)
-                                    <div class="bg-gray-50 dark:bg-neutral-700 rounded-lg p-4">
-                                        <label
-                                            class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Catatan</label>
-                                        <p class="text-sm text-gray-900 dark:text-white">{{ $credential->note }}</p>
-                                    </div>
-                                @endif
                             @endforeach
+
+                            <div class="bg-gray-50 dark:bg-neutral-700 rounded-lg p-4">
+                                <label
+                                    class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Catatan</label>
+                                <p class="text-sm text-gray-900 dark:text-white">{{ $credential->note }}</p>
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -527,33 +562,64 @@
                     </div>
                     <div class="p-6">
                         <div class="space-y-4">
+                            <!-- Timeline 1: Diterima -->
                             <div class="flex gap-3">
                                 <div class="shrink-0 size-2 bg-blue-600 rounded-full mt-2"></div>
                                 <div class="grow">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">Diterima</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ \Carbon\Carbon::parse($workOrder->date_received)->format('d M Y H:i') }}
+                                        {{ $workOrder->date_received ?? '-' }}
                                     </p>
                                 </div>
                             </div>
+
+                            <!-- Timeline 2: Masuk Antrian -->
                             @if ($workOrder->date_queue)
                                 <div class="flex gap-3">
                                     <div class="shrink-0 size-2 bg-green-600 rounded-full mt-2"></div>
                                     <div class="grow">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white">Masuk Antrian</p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ \Carbon\Carbon::parse($workOrder->date_queue)->format('d M Y H:i') }}
+                                            {{ $workOrder->date_queue }}
                                         </p>
                                     </div>
                                 </div>
                             @endif
-                            @if ($workOrder->date_completed)
+
+                            <!-- Timeline 3: revision -->
+                            @if ($workOrder->date_revision)
+                                <div class="flex gap-3">
+                                    <div class="shrink-0 size-2 bg-orange-600 rounded-full mt-2"></div>
+                                    <div class="grow">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">revision</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $workOrder->date_revision }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Timeline 3: Migration -->
+                            @if ($workOrder->date_migration)
                                 <div class="flex gap-3">
                                     <div class="shrink-0 size-2 bg-purple-600 rounded-full mt-2"></div>
                                     <div class="grow">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">Migration</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $workOrder->date_migration }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Timeline 4: Selesai -->
+                            @if ($workOrder->date_completed)
+                                <div class="flex gap-3">
+                                    <div class="shrink-0 size-2 bg-gray-600 rounded-full mt-2"></div>
+                                    <div class="grow">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white">Selesai</p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ \Carbon\Carbon::parse($workOrder->date_completed)->format('d M Y H:i') }}
+                                            {{ $workOrder->date_completed }}
                                         </p>
                                     </div>
                                 </div>
@@ -683,14 +749,14 @@
                             <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal
                                 Dibuat</label>
                             <p class="text-sm text-gray-900 dark:text-white">
-                                {{ \Carbon\Carbon::parse($workOrder->created_at)->format('d M Y H:i') }}
+                                {{ $workOrder->created_at ?? '-' }}
                             </p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Terakhir
                                 Diupdate</label>
                             <p class="text-sm text-gray-900 dark:text-white">
-                                {{ \Carbon\Carbon::parse($workOrder->updated_at)->format('d M Y H:i') }}
+                                {{ $workOrder->updated_at ?? '-' }}
                             </p>
                         </div>
                     </div>
@@ -698,6 +764,10 @@
             </div>
         </div>
     </div>
+
+
+
+
 @endsection
 
 <!-- JavaScript untuk Copy Functionality -->

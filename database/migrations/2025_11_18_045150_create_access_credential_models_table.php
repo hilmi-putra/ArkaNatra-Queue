@@ -46,6 +46,12 @@ return new class extends Migration
             $table->string('username_webmail')->nullable();
             $table->string('password_webmail')->nullable();
 
+            $table->boolean('send_access')->default(false);
+            $table->boolean('web')->default(false);
+            $table->boolean('ojs')->default(false);
+            $table->boolean('cpanel')->default(false);
+            $table->boolean('webmail')->default(false);
+
             $table->timestamps();
             $table->softDeletes();
         });

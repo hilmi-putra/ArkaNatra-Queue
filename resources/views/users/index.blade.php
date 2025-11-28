@@ -73,12 +73,6 @@
                                                 class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Division</span>
                                         </th>
 
-                                        <th class="px-6 py-3 text-start">
-                                            <span
-                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Work
-                                                Orders</span>
-                                        </th>
-
                                         <th class="px-6 py-3 text-end">
                                             <span
                                                 class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Aksi</span>
@@ -125,13 +119,6 @@
                                             <td class="px-6 py-3">
                                                 <span class="text-sm text-gray-700 dark:text-neutral-300">
                                                     {{ $user->division->name ?? '-' }}
-                                                </span>
-                                            </td>
-
-                                            <!-- Work Orders Total -->
-                                            <td class="px-6 py-3">
-                                                <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                    {{ $user->workOrders->count() }}
                                                 </span>
                                             </td>
 

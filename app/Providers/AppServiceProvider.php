@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\WorkOrderModel;
+use App\Observers\WorkOrderObserver;
 use Illuminate\Support\ServiceProvider;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Carbon::setLocale('id');
+        WorkOrderModel::observe(WorkOrderObserver::class);
     }
 }

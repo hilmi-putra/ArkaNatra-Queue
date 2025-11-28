@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\IndexingTypeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QueueController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\WorkOrderIndexingController;
@@ -15,8 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::get('/', function () {
-    return view('welcome');
+    return view('queue.index');
 });
+
+Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
+Route::post('/queue/check', [QueueController::class, 'checkStatus'])->name('queue.check');
 
 // Auth routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -35,10 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
     });
 
-    // routes/web.php
-Route::get('/work-orders', [WorkOrderController::class, 'index']);
-Route::get('/api/work-orders', [WorkOrderController::class, 'apiWorkOrders']);
-Route::get('/api/work-orders/queue-estimations', [WorkOrderController::class, 'getQueueEstimations']);
+    // Queue routes
+    Route::get('/api/queue', [QueueController::class, 'getQueueData'])->name('api.queue.data');
 });
 
 Route::middleware(['auth', 'checkrole:admin'])
@@ -48,8 +50,7 @@ Route::middleware(['auth', 'checkrole:admin'])
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::resource('customers', CustomerController::class);
 
     Route::resource('indexing-types', IndexingTypeController::class);
     
@@ -59,7 +60,14 @@ Route::middleware(['auth', 'checkrole:admin'])
 
     Route::resource('work-orders', WorkOrderController::class);
 
-    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work_order_indexing.index');
+    Route::resource('access-credentials', AccessCredentialController::class);
+    
+    // Access Credentials Routes for Admin
+    Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
+    Route::get('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData'])->name('work-orders.email-data');
+    Route::post('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData']); // For password verification
+
+    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
     
     Route::resource('work-types', WorkTypeController::class);
 });
@@ -71,14 +79,20 @@ Route::middleware(['auth', 'checkrole:production'])
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::resource('access-credentials', AccessCredentialController::class);
+    Route::resource('customers', CustomerController::class);
     Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
     Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing-types.index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
 
     Route::resource('work-orders', WorkOrderController::class);
+    Route::post('/work-orders/{workOrder}/status', [WorkOrderController::class, 'updateStatus'])->name('work-orders.updateStatus');
+    
+    // Access Credentials Routes for Production
+    Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
+    Route::get('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData'])->name('work-orders.email-data');
+    Route::post('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData']); // For password verification
 
     Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });
@@ -90,13 +104,20 @@ Route::middleware(['auth', 'checkrole:sales'])
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::resource('access-credentials', AccessCredentialController::class);
+    Route::resource('customers', CustomerController::class);
     Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
-    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing_types.index');
+    Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing-types.index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work_order_indexing.index');
-    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
+
+    Route::resource('work-orders', WorkOrderController::class);
+    
+    // Access Credentials Routes for Sales
+    Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
+    Route::get('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData'])->name('work-orders.email-data');
+    Route::post('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData']); // For password verification
+    
     Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });
 
@@ -109,12 +130,16 @@ Route::middleware(['auth', 'checkrole:asservice'])
 
     Route::resource('work-orders', WorkOrderController::class);
 
-    Route::get('/access-credentials', [AccessCredentialController::class, 'index'])->name('access_credentials.index');
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    // Access Credentials Routes for AsService
+    Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
+    Route::get('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData'])->name('work-orders.email-data');
+    Route::post('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData']); // For password verification
+
+    Route::resource('access-credentials', AccessCredentialController::class);
+    Route::resource('customers', CustomerController::class);
     Route::get('/divisions', [DivisionController::class, 'index'])->name('divisions.index');
     Route::get('/indexing-types', [IndexingTypeController::class, 'index'])->name('indexing-types.index');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/work-order-indexing', [WorkOrderIndexingController::class, 'index'])->name('work-order-indexing.index');
-    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });

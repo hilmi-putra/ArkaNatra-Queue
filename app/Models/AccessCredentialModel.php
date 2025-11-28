@@ -37,7 +37,15 @@ class AccessCredentialModel extends Model
         'server',
         'note',
         'status',
-        'expiration_date'
+        'expiration_date',
+
+        'send_access',
+        'web',
+        'ojs',
+        'cpanel',
+        'webmail',
+
+
     ];
 
     public function customer()

@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
     <!-- Page Wrapper -->
     <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
 
@@ -21,8 +20,63 @@
                                     relasinya.</p>
                             </div>
 
-                            @role('asservice')
-                                <div class="flex justify-end gap-x-2">
+                            <div class="flex justify-end gap-x-2">
+                                <!-- Filter Dropdown -->
+                                <div class="hs-dropdown [--placement:bottom-right] relative inline-block"
+                                    data-hs-dropdown-auto-close="outside">
+                                    <button id="hs-as-table-table-filter-dropdown" type="button"
+                                        class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
+                                        <svg class="shrink-0 size-3.5 text-gray-800 dark:text-neutral-200"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 6h18" />
+                                            <path d="M7 12h10" />
+                                            <path d="M10 18h4" />
+                                        </svg>
+                                        Filter
+                                        <span id="filter-count"
+                                            class="hidden inline-flex items-center gap-1.5 py-0.5 px-1.5 rounded-full text-xs font-medium border border-gray-300 text-gray-800 dark:border-neutral-700 dark:text-neutral-300">0</span>
+                                    </button>
+                                    <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-48 z-20 bg-white shadow-md rounded-lg mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700"
+                                        role="menu">
+                                        <div class="p-4">
+                                            <div class="mb-4">
+                                                <label for="filter-status"
+                                                    class="block text-sm font-medium mb-2 dark:text-white">Status</label>
+                                                <select id="filter-status"
+                                                    class="py-2 px-3 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                                                    <option value="">All</option>
+                                                    <option value="validate">Validate</option>
+                                                    <option value="queue">Queue</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="progress">Progress</option>
+                                                    <option value="revision">Revision</option>
+                                                    <option value="migration">Migration</option>
+                                                    <option value="finish">Finish</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label for="filter-fast-track"
+                                                    class="block text-sm font-medium mb-2 dark:text-white">Fast
+                                                    Track</label>
+                                                <select id="filter-fast-track"
+                                                    class="py-2 px-3 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                                                    <option value="">All</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="p-2 border-t border-gray-200 dark:border-neutral-700">
+                                            <button id="apply-filters" type="button"
+                                                class="w-full py-2 px-3 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                                                Apply Filters
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                @role('asservice')
                                     <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
                                         href="{{ route('asservice.work-orders.create') }}">
                                         <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="16"
@@ -32,379 +86,122 @@
                                         </svg>
                                         Tambah Work Order
                                     </a>
-                                </div>
-                            @endrole
+                                @endrole
+                            </div>
                         </div>
                         <!-- End Header -->
 
-                        @if ($data->count() > 0)
-                            <!-- Table -->
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                                <thead class="bg-gray-50 dark:bg-neutral-800">
-                                    <tr>
-                                        <th scope="col" class="ps-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">No</span>
-                                            </div>
-                                        </th>
+                        <!-- Table -->
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
+                            <thead class="bg-gray-50 dark:bg-neutral-800">
+                                <tr>
+                                    <th scope="col" class="ps-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">No</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Ref
-                                                    ID</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Ref
+                                                ID</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Antrian
-                                                    Ke</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Antrian
+                                                Ke</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Customer</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Customer</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                                    Marketing
-                                                </span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
+                                                Marketing
+                                            </span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
-                                                    Production
-                                                </span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">
+                                                Production
+                                            </span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Status</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Status</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Qty</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Qty</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Estimasi</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Estimasi</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Fast
-                                                    Track</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Fast
+                                                Track</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Received</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Tgl
+                                                Diterima</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-start">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Completed</span>
-                                            </div>
-                                        </th>
+                                    <th scope="col" class="px-6 py-3 text-start">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Tgl
+                                                Selesai</span>
+                                        </div>
+                                    </th>
 
-                                        <th scope="col" class="px-6 py-3 text-end">
-                                            <div class="flex items-center gap-x-2">
-                                                <span
-                                                    class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Aksi</span>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>
+                                    <th scope="col" class="px-6 py-3 text-end">
+                                        <div class="flex items-center gap-x-2">
+                                            <span
+                                                class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Aksi</span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
 
-                                <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                    @foreach ($data as $order)
-                                        <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-
-                                            <!-- No -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="ps-6 py-3">
-                                                    <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                                        {{ $loop->iteration }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Ref ID -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                                        {{ $order->ref_id }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Antrian Ke -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                                        {{ $loop->iteration }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Customer -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->customer->name ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- PIC User -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->salesUser->name ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- PIC User -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->productionUser->name ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Status -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    @if ($order->status === 'completed')
-                                                        <span
-                                                            class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full dark:bg-teal-500/10 dark:text-teal-500">
-                                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg"
-                                                                width="16" height="16" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
-                                                            </svg>
-                                                            Completed
-                                                        </span>
-                                                    @elseif($order->status === 'revision')
-                                                        <span
-                                                            class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full dark:bg-orange-500/10 dark:text-orange-500">
-                                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg"
-                                                                width="16" height="16" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
-                                                            </svg>
-                                                            Revision
-                                                        </span>
-                                                    @else
-                                                        <span
-                                                            class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full dark:bg-blue-500/10 dark:text-blue-500">
-                                                            <svg class="size-2.5" xmlns="http://www.w3.org/2000/svg"
-                                                                width="16" height="16" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                            </svg>
-                                                            {{ ucfirst($order->status) }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </td>
-
-                                            <!-- Quantity -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->quantity }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Estimasi -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300"
-                                                        title="Estimasi: {{ $order->calculated_estimation_days }} hari">
-                                                        {{ $order->calculated_estimation ?? '-' }}
-                                                    </span>
-                                                    @if ($order->calculated_estimation != $order->estimasi_date)
-                                                        <span class="text-xs text-orange-500 ml-1"
-                                                            title="Estimasi terupdate">
-                                                            ↆ
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </td>
-
-                                            <!-- Info Tambahan -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span
-                                                        class="text-xs {{ $order->fast_track ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }} px-2 py-1 rounded-full">
-                                                        {{ $order->fast_track ? 'Fast Track' : 'Regular' }}
-                                                    </span>
-                                                    <span class="text-xs text-gray-500 ml-1">
-                                                        {{ $order->calculated_estimation_days }} hari
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Date Received -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->date_received ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Date Completed -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-3">
-                                                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                                                        {{ $order->date_completed ?? '-' }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Actions -->
-                                            <td class="size-px whitespace-nowrap">
-                                                <div class="px-6 py-1.5 flex justify-end">
-                                                    <div
-                                                        class="hs-dropdown relative inline-flex [--placement:bottom-right]">
-                                                        <button
-                                                            class="hs-dropdown-toggle py-1.5 px-2 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                width="16" height="16" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                                                            </svg>
-                                                        </button>
-
-                                                        <div
-                                                            class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
-                                                            <div class="py-2 first:pt-0 last:pb-0">
-
-                                                                @php
-                                                                    $role = auth()->user()->getRoleNames()->first();
-                                                                    $prefix = '';
-
-                                                                    if ($role === 'admin') {
-                                                                        $prefix = 'admin.';
-                                                                    } elseif ($role === 'production') {
-                                                                        $prefix = 'production.';
-                                                                    } elseif ($role === 'sales') {
-                                                                        $prefix = 'sales.';
-                                                                    } elseif ($role === 'asservice') {
-                                                                        $prefix = 'asservice.';
-                                                                    }
-                                                                @endphp
-                                                                <a href="{{ route($prefix .'work-orders.show', $order->id) }}"
-                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700">
-                                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                        width="16" height="16" fill="currentColor"
-                                                                        viewBox="0 0 16 16">
-                                                                        <path
-                                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                                    </svg>
-                                                                    Detail
-                                                                </a>
-
-                                                                @role('asservice')
-                                                                    <!-- Edit -->
-                                                                    <a href="{{ route('asservice.work-orders.edit', $order->id) }}"
-                                                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
-                                                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                            width="16" height="16" fill="currentColor"
-                                                                            viewBox="0 0 16 16">
-                                                                            <path
-                                                                                d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
-                                                                        </svg>
-                                                                        Edit
-                                                                    </a>
-
-                                                                    <!-- Button Delete Baru -->
-                                                                    <button type="button"
-                                                                        class="delete-workorder-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
-                                                                        data-workorder-id="{{ $order->id }}"
-                                                                        data-ref-id="{{ $order->ref_id }}"
-                                                                        data-customer="{{ $order->customer->name }}"
-                                                                        data-division="{{ $order->division->name ?? '-' }}"
-                                                                        data-worktype="{{ $order->workType->work_type ?? '-' }}"
-                                                                        data-status="{{ $order->status }}"
-                                                                        data-queue="{{ $order->antrian_ke }}"
-                                                                        data-hs-overlay="#hs-delete-workorder-modal">
-                                                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                            width="16" height="16" fill="currentColor"
-                                                                            viewBox="0 0 16 16">
-                                                                            <path
-                                                                                d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
-                                                                        </svg>
-                                                                        Hapus
-                                                                    </button>
-                                                                @endrole
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <!-- End Table -->
-                        @else
-                            <!-- Empty State -->
-                            <div class="max-w-sm w-full min-h-100 flex flex-col justify-center mx-auto px-6 py-4">
-                                <div
-                                    class="flex justify-center items-center size-11 bg-gray-100 rounded-lg dark:bg-neutral-800">
-                                    <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400"
-                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor" viewBox="0 0 16 16">
-                                        <path
-                                            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
-                                    Tidak ada data Work Order
-                                </h2>
-                                <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                                    Mulai dengan menambahkan Work Order baru untuk mengisi data.
-                                </p>
-                            </div>
-                            <!-- End Empty State -->
-                        @endif
+                            <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
+                                @include('work-orders.partials.table-rows', ['data' => $data])
+                            </tbody>
+                        </table>
+                        <!-- End Table -->
                     </div>
                 </div>
             </div>
@@ -413,54 +210,236 @@
 
     </div>
     <!-- End Page Wrapper -->
-
 @endsection
 
-<script>
-    // resources/js/work-queue.js
-    class WorkQueueUpdater {
-        constructor() {
-            this.updateInterval = 30000; // 30 detik
-            this.init();
-        }
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi untuk menyalin teks ke clipboard
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(function() {
+                    // Show success message (optional)
+                    console.log('Text copied to clipboard successfully!');
 
-        init() {
-            this.loadQueueData();
-            setInterval(() => this.loadQueueData(), this.updateInterval);
-        }
+                    // Anda bisa menambahkan toast notification di sini
+                    // Contoh: showToast('Info berhasil disalin ke clipboard!', 'success');
+                }).catch(function(err) {
+                    console.error('Failed to copy text: ', err);
 
-        async loadQueueData() {
-            try {
-                const response = await fetch('/api/work-orders/queue-estimations');
-                const data = await response.json();
-
-                if (data.success) {
-                    this.updateUI(data.data);
-                }
-            } catch (error) {
-                console.error('Error fetching queue data:', error);
-            }
-        }
-
-        updateUI(orders) {
-            orders.forEach(order => {
-                // Update estimasi di UI
-                const estimasiElement = document.querySelector(
-                    `[data-order-id="${order.id}"] .estimasi-date`);
-                if (estimasiElement) {
-                    estimasiElement.textContent = order.estimated_date;
-
-                    // Highlight jika berbeda dengan database
-                    if (order.estimated_date !== order.current_estimasi_date) {
-                        estimasiElement.classList.add('text-orange-600', 'font-semibold');
+                    // Fallback untuk browser lama
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        console.log('Text copied to clipboard using fallback!');
+                    } catch (err) {
+                        console.error('Fallback copy failed: ', err);
                     }
+                    document.body.removeChild(textArea);
+                });
+            }
+
+            // Event listener untuk tombol copy
+            document.querySelectorAll('.copy-customer-info-btn').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const refId = this.getAttribute('data-ref-id');
+                    const token = this.getAttribute('data-token');
+                    const baseUrl = this.getAttribute('data-url');
+
+                    // Format pesan profesional
+                    const message =
+                        `Untuk melihat status antrian pekerjaan Anda, silakan kunjungi website kami di ${baseUrl} dan gunakan Ref ID: ${refId} serta Token: ${token}`;
+
+                    // Salin ke clipboard
+                    copyToClipboard(message);
+
+                    // Optional: Tambahkan feedback visual
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = `
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                Disalin!
+            `;
+
+                    // Kembalikan ke state semula setelah 2 detik
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Existing script for status update, now with SweetAlert
+            document.body.addEventListener('click', function(e) {
+                if (e.target.closest('.status-update-btn')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.status-update-btn');
+                    const orderId = button.getAttribute('data-order-id');
+                    const newStatus = button.getAttribute('data-status');
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
+                        'content');
+
+                    // Get status display name for better message
+                    const statusNames = {
+                        'validate': 'Validate',
+                        'queue': 'Queue',
+                        'pending': 'Pending',
+                        'progress': 'Progress',
+                        'revision': 'Revision',
+                        'migration': 'Migration',
+                        'finish': 'Finish'
+                    };
+
+                    const statusName = statusNames[newStatus] || newStatus;
+
+                    // Show loading alert
+                    Swal.fire({
+                        title: 'Updating Status...',
+                        text: `Changing status to ${statusName}`,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch(`/production/work-orders/${orderId}/status`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                status: newStatus
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                // Success alert
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: data.message || 'Status updated successfully!',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    willClose: () => {
+                                        window.location.reload();
+                                    }
+                                });
+                            } else {
+                                // Error alert from server
+                                throw new Error(data.message || 'Unknown error occurred');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('There was an error updating status!', error);
+
+                            // Error alert
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed!',
+                                text: error.message ||
+                                    'An unexpected error occurred during status update.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#d33'
+                            });
+                        });
                 }
             });
-        }
-    }
 
-    // Inisialisasi
-    document.addEventListener('DOMContentLoaded', function() {
-        new WorkQueueUpdater();
-    });
-</script>
+            // Existing filter code remains the same
+            const applyFiltersBtn = document.getElementById('apply-filters');
+            const statusFilter = document.getElementById('filter-status');
+            const fastTrackFilter = document.getElementById('filter-fast-track');
+            const tableBody = document.querySelector('tbody');
+            const filterCount = document.getElementById('filter-count');
+            const filterDropdownButton = document.getElementById('hs-as-table-table-filter-dropdown');
+            const filterDropdownContent = document.querySelector('.hs-dropdown [role="menu"]');
+
+            // Prevent dropdown close when clicking inside dropdown content
+            if (filterDropdownContent) {
+                filterDropdownContent.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Prevent dropdown close when interacting with select elements
+            [statusFilter, fastTrackFilter].forEach(select => {
+                select.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            applyFiltersBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+
+                const status = statusFilter.value;
+                const fastTrack = fastTrackFilter.value;
+                let filtersApplied = 0;
+
+                const url = new URL('{{ route(request()->route()->getName()) }}');
+
+                if (status) {
+                    url.searchParams.set('status', status);
+                    filtersApplied++;
+                }
+                if (fastTrack !== '') {
+                    url.searchParams.set('fast_track', fastTrack);
+                    filtersApplied++;
+                }
+
+                if (filtersApplied > 0) {
+                    filterCount.textContent = filtersApplied;
+                    filterCount.classList.remove('hidden');
+                } else {
+                    filterCount.classList.add('hidden');
+                }
+
+                tableBody.innerHTML =
+                    `<tr><td colspan="13" class="text-center py-4"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...</td></tr>`;
+
+                fetch(url.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        tableBody.innerHTML = data.html;
+                        setTimeout(() => window.HSStaticMethods.autoInit(), 100);
+
+                        // Close dropdown setelah data berhasil dimuat
+                        const dropdownInstance = HSDropdown.getInstance(filterDropdownButton
+                            .parentElement);
+                        if (dropdownInstance) {
+                            dropdownInstance.close();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching filtered data:', error);
+                        tableBody.innerHTML =
+                            `<tr><td colspan="13" class="text-center py-4 text-red-500">Error loading data. Please try again.</td></tr>`;
+                    });
+            });
+        });
+    </script>
+@endsection
