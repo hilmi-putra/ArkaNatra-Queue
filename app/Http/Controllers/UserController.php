@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $data = User::with(['division', 'roles'])->get();
+        $data = User::with(['division', 'roles'])->paginate(10);
         return view('users.index', compact('data'));
     }
 

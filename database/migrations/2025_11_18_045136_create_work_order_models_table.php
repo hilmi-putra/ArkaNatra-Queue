@@ -18,14 +18,18 @@ return new class extends Migration
             'validate', 'queue', 'pending', 'progress',
             'revision', 'migration', 'finish'
         ])->default('validate');
+        // Index frequently filtered column
+        $table->index('status');
 
         $table->boolean('send_access')->default(false);
 
         $table->string('ref_id')->nullable();
+        $table->index('ref_id');
         $table->integer('antrian_ke')->nullable();
 
         // FK: customer_id
         $table->unsignedBigInteger('customer_id');
+        $table->index('customer_id');
         $table->foreign('customer_id')
             ->references('id')
             ->on('table_customer')
@@ -33,6 +37,7 @@ return new class extends Migration
 
         // FK: sales_id (User Role: Sales)
         $table->unsignedBigInteger('sales_id')->nullable();
+        $table->index('sales_id');
         $table->foreign('sales_id')
             ->references('id')
             ->on('users')
@@ -40,6 +45,7 @@ return new class extends Migration
 
         // FK: production_id (User Role: Production)
         $table->unsignedBigInteger('production_id')->nullable();
+        $table->index('production_id');
         $table->foreign('production_id')
             ->references('id')
             ->on('users')
@@ -47,6 +53,7 @@ return new class extends Migration
 
         // FK: division_id
         $table->unsignedBigInteger('division_id');
+        $table->index('division_id');
         $table->foreign('division_id')
             ->references('id')
             ->on('table_division')
@@ -54,6 +61,7 @@ return new class extends Migration
 
         // FK: work_type_id
         $table->unsignedBigInteger('work_type_id');
+        $table->index('work_type_id');
         $table->foreign('work_type_id')
             ->references('id')
             ->on('table_work_types')

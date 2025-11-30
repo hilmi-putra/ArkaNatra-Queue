@@ -228,11 +228,27 @@ dark:bg-neutral-900"
                         </a>
                     </li>
 
-                    <!-- Work Orders -->
-                    <li>
-                        @php $isActive = request()->routeIs($prefix . 'work-orders.index'); @endphp
-                        <a href="{{ route($prefix . 'work-orders.index') }}"
-                            class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 dark:text-neutral-200 dark:hover:bg-neutral-800 {{ $isActive ? 'active-link' : '' }}">
+                    <!-- Work Orders with Submenu -->
+                    <li class="hs-accordion" id="work-orders-accordion">
+                        @php
+                            $statusRoutes = [
+                                'work-orders.status.validate',
+                                'work-orders.status.queue',
+                                'work-orders.status.pending',
+                                'work-orders.status.progress',
+                                'work-orders.status.revision',
+                                'work-orders.status.migration',
+                                'work-orders.status.finish',
+                            ];
+                            $isActive =
+                                request()->routeIs($prefix . 'work-orders.index') ||
+                                collect($statusRoutes)->some(fn($route) => request()->routeIs($prefix . $route));
+                        @endphp
+
+                        <button type="button"
+                            class="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 dark:text-neutral-200 {{ $isActive ? 'active-link' : '' }}"
+                            aria-expanded="{{ $isActive ? 'true' : 'false' }}"
+                            aria-controls="work-orders-accordion-child">
                             <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
                                 xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -244,7 +260,240 @@ dark:bg-neutral-900"
                                 <path d="M10 9H8" />
                             </svg>
                             Work Orders
-                        </a>
+
+                            <svg class="hs-accordion-active:block ms-auto hidden size-4 text-gray-600 dark:text-neutral-400"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m18 15-6-6-6 6" />
+                            </svg>
+
+                            <svg class="hs-accordion-active:hidden ms-auto block size-4 text-gray-600 dark:text-neutral-400"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m6 9 6 6 6-6" />
+                            </svg>
+                        </button>
+
+                        <div id="work-orders-accordion-child"
+                            class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 {{ $isActive ? '' : 'hidden' }}"
+                            role="region" aria-labelledby="work-orders-accordion">
+
+                            <ul class="hs-accordion-group ps-8 pt-1 space-y-1" data-hs-accordion-always-open>
+                                @php
+                                    use App\Models\WorkOrderModel;
+                                    use Illuminate\Support\Facades\Auth;
+
+                                    $user = Auth::user();
+                                    $userId = $user->id;
+                                    $role = $user->getRoleNames()->first();
+
+                                    // Role yang bisa melihat semua data
+                                    $supervisorRoles = ['admin', 'asservice'];
+
+                                    // Buat query
+                                    $userWorkOrdersQuery = WorkOrderModel::query();
+
+                                    // Tambahkan filter jika user bukan supervisor
+                                    // Perbaikan: Gunakan in_array() untuk pengecekan role
+                                    if (!in_array($role, $supervisorRoles)) {
+                                        $userWorkOrdersQuery->where(function ($query) use ($userId) {
+                                            $query->where('production_id', $userId)->orWhere('sales_id', $userId);
+                                        });
+                                    }
+
+                                    // Hitung total work orders
+                                    $totalWorkOrders = $userWorkOrdersQuery->count();
+
+                                    // Hitung per status dengan group by
+                                    $statusCounts = $userWorkOrdersQuery
+                                        ->clone()
+                                        ->selectRaw('status, count(*) as count')
+                                        ->groupBy('status')
+                                        ->pluck('count', 'status')
+                                        ->toArray();
+
+                                    $totalStatusCount = array_sum($statusCounts);
+
+                                    $validateCount = $statusCounts['validate'] ?? 0;
+                                    $queueCount = $statusCounts['queue'] ?? 0;
+                                    $pendingCount = $statusCounts['pending'] ?? 0;
+                                    $progressCount = $statusCounts['progress'] ?? 0;
+                                    $revisionCount = $statusCounts['revision'] ?? 0;
+                                    $migrationCount = $statusCounts['migration'] ?? 0;
+                                    $finishCount = $statusCounts['finish'] ?? 0;
+                                @endphp
+
+                                <!-- All Work Orders -->
+                                <li>
+                                    <a href="{{ route($prefix . 'work-orders.index') }}"
+                                        class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 dark:text-neutral-200 {{ request()->routeIs($prefix . 'work-orders.index') ? 'active-link' : '' }}">
+                                        <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
+                                            <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9" />
+                                            <path d="M12 3v6" />
+                                        </svg>
+                                        All Work Orders
+                                        <!-- Badge untuk All Work Orders -->
+                                        <span
+                                            class="inline-flex items-center justify-center ms-auto size-5 text-xs font-medium text-white bg-blue-600 rounded-full">
+                                            {{ $totalWorkOrders }}
+                                        </span>
+                                    </a>
+                                </li>
+
+                                <!-- Status Accordion -->
+                                <li class="hs-accordion" id="work-orders-status-accordion">
+                                    @php
+                                        $statusActive = collect($statusRoutes)->some(
+                                            fn($route) => request()->routeIs($prefix . $route),
+                                        );
+                                    @endphp
+
+                                    <button type="button"
+                                        class="hs-accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 dark:text-neutral-200 {{ $statusActive ? 'active-link' : '' }}"
+                                        aria-expanded="{{ $statusActive ? 'true' : 'false' }}"
+                                        aria-controls="work-orders-status-accordion-child">
+                                        <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <path d="M12 16v-4" />
+                                            <path d="M12 8h.01" />
+                                        </svg>
+                                        Status
+
+                                        <!-- Badge untuk total semua status -->
+                                        <span
+                                            class="inline-flex items-center justify-center ms-auto size-5 text-xs font-medium text-white bg-gray-600 rounded-full">
+                                            {{ $totalStatusCount }}
+                                        </span>
+
+                                        <svg class="hs-accordion-active:block ms-2 hidden size-4"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m18 15-6-6-6 6" />
+                                        </svg>
+
+                                        <svg class="hs-accordion-active:hidden ms-2 block size-4"
+                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m6 9 6 6 6-6" />
+                                        </svg>
+                                    </button>
+
+                                    <div id="work-orders-status-accordion-child"
+                                        class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 {{ $statusActive ? '' : 'hidden' }}"
+                                        role="region" aria-labelledby="work-orders-status-accordion">
+
+                                        <ul class="pt-1 space-y-1">
+                                            @php
+                                                $statuses = [
+                                                    'validate' => [
+                                                        'label' => 'Validate',
+                                                        'color' => 'blue',
+                                                        'count' => $validateCount,
+                                                        'icon' =>
+                                                            '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                                                    ],
+                                                    'queue' => [
+                                                        'label' => 'Queue',
+                                                        'color' => 'purple',
+                                                        'count' => $queueCount,
+                                                        'icon' =>
+                                                            '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                                                    ],
+                                                    'pending' => [
+                                                        'label' => 'Pending',
+                                                        'color' => 'yellow',
+                                                        'count' => $pendingCount,
+                                                        'icon' =>
+                                                            '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                                                    ],
+                                                    'progress' => [
+                                                        'label' => 'Progress',
+                                                        'color' => 'indigo',
+                                                        'count' => $progressCount,
+                                                        'icon' => '<path d="M13 10V3L4 14h7v7l9-11h-7z"/>',
+                                                    ],
+                                                    'revision' => [
+                                                        'label' => 'Revision',
+                                                        'color' => 'red',
+                                                        'count' => $revisionCount,
+                                                        'icon' =>
+                                                            '<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>',
+                                                    ],
+                                                    'migration' => [
+                                                        'label' => 'Migration',
+                                                        'color' => 'orange',
+                                                        'count' => $migrationCount,
+                                                        'icon' =>
+                                                            '<path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>',
+                                                    ],
+                                                    'finish' => [
+                                                        'label' => 'Finish',
+                                                        'color' => 'green',
+                                                        'count' => $finishCount,
+                                                        'icon' =>
+                                                            '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+                                                    ],
+                                                ];
+                                            @endphp
+
+                                            @foreach ($statuses as $statusKey => $statusData)
+                                                @php
+                                                    // Tentukan class warna badge menggunakan if else
+                                                    if ($statusData['color'] == 'blue') {
+                                                        $badgeColor = 'bg-blue-500';
+                                                    } elseif ($statusData['color'] == 'purple') {
+                                                        $badgeColor = 'bg-purple-500';
+                                                    } elseif ($statusData['color'] == 'yellow') {
+                                                        $badgeColor = 'bg-yellow-500';
+                                                    } elseif ($statusData['color'] == 'indigo') {
+                                                        $badgeColor = 'bg-indigo-500';
+                                                    } elseif ($statusData['color'] == 'red') {
+                                                        $badgeColor = 'bg-red-500';
+                                                    } elseif ($statusData['color'] == 'orange') {
+                                                        $badgeColor = 'bg-orange-500';
+                                                    } elseif ($statusData['color'] == 'green') {
+                                                        $badgeColor = 'bg-green-500';
+                                                    } else {
+                                                        $badgeColor = 'bg-gray-500';
+                                                    }
+                                                @endphp
+
+                                                <li>
+                                                    <a href="{{ route($prefix . 'work-orders.status.' . $statusKey) }}"
+                                                        class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 dark:text-neutral-200 {{ request()->routeIs($prefix . 'work-orders.status.' . $statusKey) ? 'active-link' : '' }}">
+                                                        <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
+                                                            xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            {!! $statusData['icon'] !!}
+                                                        </svg>
+                                                        {{ $statusData['label'] }}
+                                                        <!-- Badge untuk setiap status -->
+                                                        <span
+                                                            class="inline-flex items-center justify-center ms-auto size-5 text-xs font-medium text-white {{ $badgeColor }} rounded-full">
+                                                            {{ $statusData['count'] }}
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </li>
+                                <!-- End Status Accordion -->
+                            </ul>
+                        </div>
                     </li>
 
                     <!-- Indexing Types -->

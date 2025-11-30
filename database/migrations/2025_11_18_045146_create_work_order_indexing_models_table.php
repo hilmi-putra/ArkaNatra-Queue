@@ -15,18 +15,21 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('work_order_id');
+            $table->index('work_order_id');
             $table->foreign('work_order_id')
                 ->references('id')
                 ->on('table_work_orders')
                 ->onDelete('cascade');
 
             $table->unsignedBigInteger('indexing_type_id');
+            $table->index('indexing_type_id');
             $table->foreign('indexing_type_id')
                 ->references('id')
                 ->on('table_indexing_types')
                 ->onDelete('cascade');
 
             $table->boolean('finished')->default(false);
+            $table->index('finished');
 
             $table->timestamps();
             $table->softDeletes();

@@ -20,22 +20,24 @@
                                     Work Order Indexing
                                 </h2>
                                 <p class="text-sm text-gray-600 dark:text-neutral-400">
-                                    Daftar indexing setiap Work Order.
+                                    Daftar indexing untuk work orders.
                                 </p>
                             </div>
 
-                            @role('admin')
-                                <div class="flex justify-end gap-x-2">
-                                    <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-                                        href="#">
-                                        <svg class="size-4" fill="none" stroke="currentColor">
-                                            <path d="M5 12h14" />
-                                            <path d="M12 5v14" />
-                                        </svg>
-                                        Tambah Work Order Indexing
-                                    </a>
-                                </div>
-                            @endrole
+                            <div class="flex justify-end gap-x-2">
+                                @role('asservice')
+                                <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+                                    href="{{ route('asservice.work-order-indexing.create') }}">
+                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14" />
+                                        <path d="M12 5v14" />
+                                    </svg>
+                                    Tambah Indexing
+                                </a>
+                                @endrole
+                            </div>
                         </div>
                         <!-- End Header -->
 
@@ -84,10 +86,11 @@
                                                 </span>
                                             </td>
 
-                                            <!-- Work Order (ref_id) -->
+                                            <!-- Work Order -->
                                             <td class="px-6 py-3">
                                                 <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                                                    {{ $item->workOrder->ref_id ?? '-' }}
+                                                    #{{ $item->workOrder->ref_id ?? $item->work_order_id }} -
+                                                    {{ $item->workOrder->customer_name ?? '-' }}
                                                 </span>
                                             </td>
 
@@ -100,15 +103,14 @@
 
                                             <!-- Finished -->
                                             <td class="px-6 py-3">
-                                                @if ($item->finished)
-                                                    <span class="text-sm text-green-600 dark:text-green-400">Yes</span>
-                                                @else
-                                                    <span class="text-sm text-red-600 dark:text-red-400">No</span>
-                                                @endif
+                                                <span class="text-sm text-gray-700 dark:text-neutral-300">
+                                                    {{ $item->finished ? 'Yes' : 'No' }}
+                                                </span>
                                             </td>
 
                                             <!-- Actions -->
                                             <td class="size-px whitespace-nowrap">
+                                                
                                                 <div class="px-6 py-1.5 flex justify-end">
                                                     <div
                                                         class="hs-dropdown relative inline-flex [--placement:bottom-right]">
@@ -124,10 +126,9 @@
                                                         <div
                                                             class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
                                                             <div class="py-2 first:pt-0 last:pb-0">
-
-
+                                                                @role('asservice')
                                                                 <!-- Edit -->
-                                                                <a href="#"
+                                                                <a href="{{ route('asservice.work-order-indexing.edit', $item->id) }}"
                                                                     class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-blue-600 hover:bg-blue-100 focus:outline-hidden focus:bg-blue-100 dark:text-blue-500 dark:hover:bg-blue-500/10 dark:focus:bg-blue-500/10">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
@@ -138,8 +139,14 @@
                                                                     Edit
                                                                 </a>
 
+                                                                <!-- Delete -->
                                                                 <button type="button"
-                                                                    class="delete-journal-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full">
+                                                                    class="delete-work-order-indexing-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-red-600 hover:bg-red-100 focus:outline-hidden focus:bg-red-100 dark:text-red-500 dark:hover:bg-red-500/10 dark:focus:bg-red-500/10 w-full"
+                                                                    data-hs-overlay="#hs-delete-work-order-indexing-modal"
+                                                                    data-item-id="{{ $item->id }}"
+                                                                    data-item-workorder="#{{ $item->workOrder->ref_id ?? $item->work_order_id }}"
+                                                                    data-item-customer="{{ $item->workOrder->customer_name ?? '-' }}"
+                                                                    data-item-indexing="{{ $item->indexingType->indexing_name ?? '-' }}">
                                                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
                                                                         width="16" height="16" fill="currentColor"
                                                                         viewBox="0 0 16 16">
@@ -148,20 +155,7 @@
                                                                     </svg>
                                                                     Hapus
                                                                 </button>
-
-                                                                <!-- Detail -->
-                                                                <button type="button"
-                                                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 w-full hs-view-journal-btn">
-                                                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg"
-                                                                        width="16" height="16" fill="currentColor"
-                                                                        viewBox="0 0 16 16">
-                                                                        <path
-                                                                            d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z" />
-                                                                        <path
-                                                                            d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z" />
-                                                                    </svg>
-                                                                    Lihat Detail
-                                                                </button>
+                                                                @endrole
                                                             </div>
                                                         </div>
                                                     </div>
@@ -185,10 +179,10 @@
                                     </svg>
                                 </div>
                                 <h2 class="mt-5 text-gray-800 font-semibold dark:text-white">
-                                    Tidak ada Work Order Indexing
+                                    Tidak ada Indexing
                                 </h2>
                                 <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                                    Tambahkan data indexing untuk Work Order.
+                                    Tambahkan indexing baru untuk work order.
                                 </p>
                             </div>
                         @endif
@@ -199,5 +193,4 @@
         </div>
 
     </div>
-
 @endsection

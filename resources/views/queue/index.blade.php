@@ -9,6 +9,7 @@
 
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dq0bylaa7/image/upload/v1764391033/AC_LOGO_1_v85q1j.png">
 
     <!-- CSS Preline -->
     <link rel="stylesheet" href="https://preline.co/assets/css/main.css?v=3.0.1">

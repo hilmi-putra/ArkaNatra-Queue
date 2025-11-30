@@ -1,3 +1,8 @@
+@php
+    $showAntrian = $showAntrian ?? false;
+    $columnCount = $showAntrian ? 10 : 9;
+@endphp
+
 @if ($data->count() > 0)
     @foreach ($data as $order)
         <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
@@ -6,7 +11,7 @@
             <td class="size-px whitespace-nowrap">
                 <div class="ps-6 py-3">
                     <span class="text-sm text-gray-600 dark:text-neutral-400">
-                        {{ $loop->iteration }}
+                        {{ $data->firstItem() + $loop->index }}
                     </span>
                 </div>
             </td>
@@ -20,14 +25,16 @@
                 </div>
             </td>
 
-            <!-- Antrian Ke -->
-            <td class="size-px whitespace-nowrap">
-                <div class="px-6 py-3">
-                    <span class="text-sm font-semibold text-gray-800 dark:text-neutral-200">
-                        {{ $order->status !== 'validate' ? $order->antrian_ke : '-' }}
-                    </span>
-                </div>
-            </td>
+            @if ($showAntrian)
+                <!-- Antrian Ke -->
+                <td class="size-px whitespace-nowrap">
+                    <div class="px-6 py-3">
+                        <span class="text-sm text-gray-700 dark:text-neutral-300">
+                            {{ $order->antrian_ke ?? '-' }}
+                        </span>
+                    </div>
+                </td>
+            @endif
 
             <!-- Customer -->
             <td class="size-px whitespace-nowrap">
@@ -38,7 +45,7 @@
                 </div>
             </td>
 
-            <!-- PIC User -->
+            <!-- Marketing -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     <span class="text-sm text-gray-700 dark:text-neutral-300">
@@ -47,7 +54,7 @@
                 </div>
             </td>
 
-            <!-- PIC User -->
+            <!-- Production -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     <span class="text-sm text-gray-700 dark:text-neutral-300">
@@ -56,7 +63,16 @@
                 </div>
             </td>
 
-            <!-- Status -->
+            <!-- Quantity -->
+            <td class="size-px whitespace-nowrap">
+                <div class="px-6 py-3">
+                    <span class="text-sm text-gray-700 dark:text-neutral-300">
+                        {{ $order->quantity }}
+                    </span>
+                </div>
+            </td>
+
+            <!-- Status Column with Inline Dropdown -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     @php
@@ -106,25 +122,7 @@
                 </div>
             </td>
 
-            <!-- Quantity -->
-            <td class="size-px whitespace-nowrap">
-                <div class="px-6 py-3">
-                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                        {{ $order->quantity }}
-                    </span>
-                </div>
-            </td>
-
-            <!-- Estimasi -->
-            <td class="size-px whitespace-nowrap">
-                <div class="px-6 py-3">
-                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                        {{ $order->status !== 'validate' && $order->estimasi_date ? $order->estimasi_date : '-' }}
-                    </span>
-                </div>
-            </td>
-
-            <!-- Info Tambahan -->
+            <!-- Fast Track -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     <span
@@ -138,36 +136,29 @@
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     <span class="text-sm text-gray-700 dark:text-neutral-300">
-                        {{ $order->date_received ?? '-' }}
-                    </span>
-                </div>
-            </td>
-
-            <!-- Date Completed -->
-            <td class="size-px whitespace-nowrap">
-                <div class="px-6 py-3">
-                    <span class="text-sm text-gray-700 dark:text-neutral-300">
-                        {{ $order->date_completed ?? '-' }}
+                        {{ $order->date_received ? $order->date_received : '-' }}
                     </span>
                 </div>
             </td>
 
             <!-- Actions -->
             <td class="size-px whitespace-nowrap">
-                <div class="px-6 py-1.5 flex justify-end">
+                <div class="px-6 py-3">
                     <div class="hs-dropdown relative inline-flex [--placement:bottom-right]">
                         <button
-                            class="hs-dropdown-toggle py-1.5 px-2 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
-                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                            class="hs-dropdown-toggle inline-flex items-center justify-center size-8 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 hover:shadow-lg focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 transition-all duration-200">
+                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="12" cy="5" r="1" />
+                                <circle cx="12" cy="19" r="1" />
                             </svg>
                         </button>
 
                         <div
-                            class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-40 z-10 bg-white shadow-2xl rounded-lg p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
-                            <div class="py-2 first:pt-0 last:pb-0">
+                            class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden divide-y divide-gray-200 min-w-44 z-20 bg-white shadow-xl rounded-xl p-2 mt-2 dark:divide-neutral-700 dark:bg-neutral-800 dark:border dark:border-neutral-700">
+                            <div class="py-2 first:pt-0 last:pb-0 space-y-1">
 
                                 @php
                                     $role = auth()->user()->getRoleNames()->first();
@@ -186,14 +177,15 @@
 
                                 <!-- Tombol Copy -->
                                 <button type="button"
-                                    class="copy-customer-info-btn inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-green-600 hover:text-green-800 focus:outline-hidden focus:text-green-800 disabled:opacity-50 disabled:pointer-events-none dark:text-green-500 dark:hover:text-green-400 dark:focus:text-green-400 transition-all duration-200 px-3 py-2 w-full"
-                                    data-ref-id="{{ $order->ref_id }}"
-                                    data-token="{{ $order->customer->token ?? 'N/A' }}"
-                                    data-customer-name="{{ $order->customer->name ?? 'N/A' }}"
-                                    data-url="{{ url('/') }}">
-                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
+                                    class="copy-customer-info-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-700 w-full transition-colors duration-200"
+                                    data-ref-id="{{ e($order->ref_id ?? '') }}"
+                                    data-token="{{ e($order->customer->token ?? '') }}"
+                                    data-customer-name="{{ e($order->customer->name ?? '') }}"
+                                    data-customer-email="{{ e($order->customer->email ?? '') }}"
+                                    data-url="{{ e(url('/')) }}">
+                                    <svg class="size-4 text-green-600" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                                     </svg>
@@ -202,24 +194,24 @@
 
                                 <!-- Tombol Detail -->
                                 <a href="{{ route($prefix . 'work-orders.show', $order->id) }}"
-                                    class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-gray-600 hover:text-gray-800 focus:outline-hidden focus:text-gray-800 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:text-neutral-300 dark:focus:text-neutral-300 transition-all duration-200 px-3 py-2 w-full">
-                                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="M12 16v-4" />
-                                        <path d="M12 8h.01" />
-                                    </svg>  
-                                    Details
+                                    class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-700 w-full transition-colors duration-200">
+                                    <svg class="size-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                    View Details
                                 </a>
 
                                 @hasanyrole('asservice|production')
                                     <!-- Tombol Edit -->
                                     <a href="{{ route('asservice.work-orders.edit', $order->id) }}"
-                                        class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-hidden focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:text-blue-400 transition-all duration-200 px-3 py-2 w-full">
-                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-700 w-full transition-colors duration-200">
+                                        <svg class="size-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
+                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                         </svg>
@@ -230,16 +222,17 @@
                                 @role('asservice')
                                     <!-- Tombol Delete -->
                                     <button type="button"
-                                        class="delete-workorder-btn inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:text-red-800 focus:outline-hidden focus:text-red-800 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:text-red-400 dark:focus:text-red-400 transition-all duration-200 px-3 py-2 w-full"
+                                        class="delete-workorder-btn flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 focus:outline-hidden focus:bg-red-50 focus:text-red-700 dark:text-neutral-300 dark:hover:bg-red-500/10 dark:hover:text-red-400 w-full transition-colors duration-200"
                                         data-workorder-id="{{ $order->id }}" data-ref-id="{{ $order->ref_id }}"
                                         data-customer="{{ $order->customer->name }}"
                                         data-division="{{ $order->division->name ?? '-' }}"
                                         data-worktype="{{ $order->workType->work_type ?? '-' }}"
                                         data-status="{{ $order->status }}" data-queue="{{ $order->antrian_ke }}"
                                         data-hs-overlay="#hs-delete-workorder-modal">
-                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg class="size-4 text-red-600" xmlns="http://www.w3.org/2000/svg"
+                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M3 6h18" />
                                             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
@@ -256,7 +249,7 @@
     @endforeach
 @else
     <tr>
-        <td colspan="13" class="text-center py-10">
+        <td colspan="{{ $columnCount }}" class="text-center py-10">
             <div class="max-w-sm w-full min-h-100 flex flex-col justify-center mx-auto px-6 py-4">
                 <div class="flex justify-center items-center size-11 bg-gray-100 rounded-lg dark:bg-neutral-800">
                     <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400"
@@ -268,10 +261,10 @@
                 </div>
 
                 <h2 class="mt-5 font-semibold text-gray-800 dark:text-white">
-                    Tidak ada data Work Order yang cocok
+                    Tidak ada data Work Order pada status ini
                 </h2>
                 <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-                    Coba ubah filter Anda atau tambahkan Work Order baru.
+                    Belum ada Work Order dengan status ini atau tidak ada yang sesuai dengan role Anda.
                 </p>
             </div>
         </td>

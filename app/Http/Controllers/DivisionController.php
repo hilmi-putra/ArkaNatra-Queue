@@ -10,7 +10,7 @@ class DivisionController extends Controller
 {
     public function index()
     {
-        $data = DivisionModel::with(['users', 'workTypes', 'workOrders'])->get();
+        $data = DivisionModel::with(['users', 'workTypes', 'workOrders'])->paginate(10);
         return view('divisions.index', compact('data'));
     }
 

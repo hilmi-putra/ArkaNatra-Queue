@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
 
             $table->unsignedBigInteger('id_divisi');
+            $table->index('id_divisi');
             $table->foreign('id_divisi')
                 ->references('id')
                 ->on('table_division')

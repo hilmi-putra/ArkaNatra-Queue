@@ -51,11 +51,28 @@ class WorkOrderController extends Controller
         $data = $query->orderByRaw($statusOrderCase)
                     ->orderByRaw('CASE WHEN antrian_ke IS NULL THEN 1 ELSE 0 END')
                     ->orderBy('antrian_ke', 'asc')
-                    ->get();
+                                ->paginate(10);
 
         if ($request->ajax()) {
             $html = view('work-orders.partials.table-rows', compact('data'))->render();
             return response()->json(['html' => $html]);
+        }
+        
+        // Get status counts for overview cards
+        $statusCountQuery = WorkOrderModel::query();
+        
+        // Apply role filter for counts
+        if ($user->hasRole('production')) {
+            $statusCountQuery->where('production_id', $user->id);
+        } elseif ($user->hasRole('sales')) {
+            $statusCountQuery->where('sales_id', $user->id);
+        }
+        
+        $statuses = ['validate', 'queue', 'pending', 'progress', 'revision', 'migration', 'finish'];
+        $statusCounts = [];
+        
+        foreach ($statuses as $status) {
+            $statusCounts[$status] = (clone $statusCountQuery)->where('status', $status)->count();
         }
         
         // Query terpisah untuk mendapatkan antrian pertama (bukan null)
@@ -72,7 +89,7 @@ class WorkOrderController extends Controller
         
         $firstQueue = $firstQueueQuery->orderBy('antrian_ke', 'asc')->first();
         
-        return view('work-orders.index', compact('data', 'firstQueue'));
+        return view('work-orders.index', compact('data', 'firstQueue', 'statusCounts'));
     }
 
     public function create()
@@ -915,5 +932,250 @@ public function getQueueByProduction(Request $request, $productionId = null)
             'message' => 'Failed to get queue: ' . $e->getMessage()
         ], 500);
     }
+}
+
+/**
+ * ==================== STATUS-BASED VIEW METHODS ====================
+ * Optimized queries untuk menampilkan work orders per status
+ * Menggunakan eager loading, column selection, dan pagination
+ */
+
+/**
+ * Tampilkan work orders dengan status VALIDATE
+ */
+    public function showValidate(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10; // Smaller pagination for better performance
+    
+    $query = WorkOrderModel::where('status', 'validate')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by status sesuai urutan
+    	$data = $query->orderBy('date_received', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.validate', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status QUEUE
+ */
+    public function showQueue(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'queue')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by antrian_ke (queue order)
+    	$data = $query->orderByRaw('CASE WHEN antrian_ke IS NULL THEN 1 ELSE 0 END')
+        ->orderBy('antrian_ke', 'asc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.queue', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status PENDING
+ */
+    public function showPending(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'pending')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_received (most recent first)
+    	$data = $query->orderBy('date_received', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.pending', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status PROGRESS
+ */
+    public function showProgress(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'progress')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_received (oldest first - priority)
+    	$data = $query->orderBy('date_received', 'asc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.progress', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status REVISION
+ */
+    public function showRevision(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'revision')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status', 'date_revision'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_revision (most recent revision first)
+    	$data = $query->orderBy('date_revision', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.revision', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status MIGRATION
+ */
+    public function showMigration(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'migration')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status', 'date_migration'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_migration (most recent migration first)
+    	$data = $query->orderBy('date_migration', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.migration', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status FINISH
+ */
+    public function showFinish(Request $request)
+{
+    $user = auth()->user();
+    	$perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'finish')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_completed', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_completed (most recent completion first)
+    	$data = $query->orderBy('date_completed', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.finish', compact('data'));
 }
 }

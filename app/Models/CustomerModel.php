@@ -14,7 +14,6 @@ class CustomerModel extends Model
     protected $fillable = [
         'token', 'name', 'address', 'phone', 'email'
     ];
-
     public function workOrders()
     {
         return $this->hasMany(WorkOrderModel::class, 'customer_id');

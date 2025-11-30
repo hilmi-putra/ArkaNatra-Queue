@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('fast_track_estimation_days')->nullable();
 
             $table->unsignedBigInteger('division_id');
+            $table->index('division_id');
             $table->foreign('division_id')
                 ->references('id')
                 ->on('table_division')

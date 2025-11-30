@@ -66,6 +66,7 @@
 @include('work-orders.components.modal')
 @include('customers.components.modal')
 @include('access-credentials.components.modal')
+@include('work-order-indexings.components.modal')
 
 <script>
     window.addEventListener('load', () => {

@@ -1,7 +1,7 @@
 // Fungsi untuk menginisialisasi DataTables dengan styling Flowbite
 function initializeDataTables() {
-    // Inisialisasi semua tabel di halaman
-    $("table").each(function () {
+    // Inisialisasi hanya tabel yang memiliki class "datatable" (exclude status pages)
+    $("table.datatable").each(function () {
         // Cek apakah tabel sudah memiliki ID, jika tidak berikan ID
         if (!this.id) {
             this.id = "datatable-" + Math.random().toString(36).substr(2, 9);
@@ -169,19 +169,22 @@ function customizeDataTables(table) {
 
     // Custom styling untuk length select dengan HS Dropdown style
     // Custom styling untuk length select dengan HS Dropdown style
-    const lengthSelect = $('#search-table_length').find("select");
+    const lengthSelect = $("#search-table_length").find("select");
     if (lengthSelect.length) {
         // Tambahkan wrapper relatif agar bisa tempatkan dropdown custom
-        const lengthContainer = $('#search-table_length');
+        const lengthContainer = $("#search-table_length");
         lengthContainer.addClass("relative inline-flex items-center mb-4 mr-4");
 
         // Ambil semua opsi dari select bawaan DataTables
-        const options = lengthSelect.find("option").map(function () {
-            return {
-                value: $(this).val(),
-                text: $(this).text()
-            };
-        }).get();
+        const options = lengthSelect
+            .find("option")
+            .map(function () {
+                return {
+                    value: $(this).val(),
+                    text: $(this).text(),
+                };
+            })
+            .get();
 
         // Ambil nilai yang sedang aktif
         const currentValue = lengthSelect.val();
@@ -207,7 +210,7 @@ function customizeDataTables(table) {
                     <div class="p-1 space-y-0.5">
                         ${options
                             .map(
-                                opt => `
+                                (opt) => `
                             <button type="button"
                                 class="length-option w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800 ${
                                     opt.value == currentValue
@@ -241,7 +244,6 @@ function customizeDataTables(table) {
                 .removeClass("opacity-100");
         });
     }
-
 
     // Custom styling untuk pagination dengan margin
     const pagination = wrapper.find(".dataTables_paginate");

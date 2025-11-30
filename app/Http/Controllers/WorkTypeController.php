@@ -10,7 +10,7 @@ class WorkTypeController extends Controller
 {
     public function index()
     {
-        $data = WorkTypeModel::with('division')->get();
+        $data = WorkTypeModel::with('division')->paginate(10);
         return view('work-types.index', compact('data'));
     }
 

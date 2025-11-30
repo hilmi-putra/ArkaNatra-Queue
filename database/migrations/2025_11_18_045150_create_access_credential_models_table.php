@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('customer_id');
+            $table->index('customer_id');
             $table->foreign('customer_id')
                 ->references('id')
                 ->on('table_customer')
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             // Ubah tipe data status dari boolean ke enum
             $table->enum('status', ['active', 'inactive', 'error', 'suspended', 'expired'])->default('active');
+            $table->index('status');
             $table->date('expiration_date')->nullable();
 
             // ➕ Tambahan

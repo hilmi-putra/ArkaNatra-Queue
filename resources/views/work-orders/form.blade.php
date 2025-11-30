@@ -69,11 +69,23 @@
                         <!-- Form Customer Existing (Select) -->
                         <div id="existing-customer-form" class="customer-form hidden">
                             <div>
-                                <label for="existing_customer_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Pilih Customer <span class="text-red-500">*</span>
+                                <label for="existing_customer_search" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Cari / Pilih Customer <span class="text-red-500">*</span>
                                 </label>
-                                <select name="existing_customer_id" id="existing_customer_id"
-                                    class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 @error('existing_customer_id') border-red-500 @enderror">
+
+                                <!-- Visible search input for user convenience -->
+                                <input type="text" id="existing_customer_search" autocomplete="off"
+                                    class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                                    placeholder="Ketik nama atau email customer...">
+
+                                <!-- Suggestions dropdown -->
+                                <ul id="customer-suggestions"
+                                    class="mt-1 max-h-52 overflow-auto bg-white border border-gray-200 rounded shadow-sm hidden">
+                                </ul>
+
+                                <!-- Keep original select for form submission (hidden but kept for compatibility) -->
+                                <select name="existing_customer_id" id="existing_customer_id" class="hidden"
+                                    aria-hidden="true">
                                     <option value="">Pilih Customer</option>
                                     @foreach ($customers as $customer)
                                         <option value="{{ $customer->id }}"
@@ -771,9 +783,128 @@
                 document.getElementById('preview-token').textContent = customer.token;
                 document.getElementById('preview-address').textContent = customer.address;
                 customerPreview.classList.remove('hidden');
+                // If search input exists, populate it for better UX
+                const searchInputEl = document.getElementById('existing_customer_search');
+                if (searchInputEl) {
+                    searchInputEl.value = customer.name + (customer.email ? ' - ' + customer.email : '');
+                }
             } else {
                 customerPreview.classList.add('hidden');
             }
+        }
+
+        // --- Search suggestions for existing customer ---
+        const customerSearchInput = document.getElementById('existing_customer_search');
+        const suggestionsBox = document.getElementById('customer-suggestions');
+        let suggestionIndex = -1;
+
+        function escapeHtml(unsafe) {
+            return String(unsafe)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function searchCustomers(query) {
+            if (!query) return [];
+            query = query.toLowerCase();
+            const results = Object.keys(customersData).map(id => {
+                const c = customersData[id];
+                return {
+                    id: c.id,
+                    name: c.name || '',
+                    email: c.email || '',
+                    token: c.token || ''
+                };
+            }).filter(c => {
+                return (c.name && c.name.toLowerCase().includes(query)) || (c.email && c.email
+                    .toLowerCase().includes(query)) || (c.token && c.token.toLowerCase().includes(
+                    query));
+            });
+            return results;
+        }
+
+        function renderSuggestions(list) {
+            suggestionsBox.innerHTML = '';
+            suggestionIndex = -1;
+            if (!list || list.length === 0) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+            list.slice(0, 8).forEach((cust) => {
+                const li = document.createElement('li');
+                li.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm';
+                li.setAttribute('data-id', cust.id);
+                li.setAttribute('role', 'option');
+                li.innerHTML =
+                    `<div class="font-medium">${escapeHtml(cust.name)}</div><div class="text-xs text-gray-500">${escapeHtml(cust.email || '')}</div>`;
+                li.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    pickCustomer(cust.id);
+                });
+                suggestionsBox.appendChild(li);
+            });
+            suggestionsBox.classList.remove('hidden');
+        }
+
+        function pickCustomer(id) {
+            if (!id) return;
+            existingCustomerSelect.value = id;
+            existingCustomerSelect.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
+            if (suggestionsBox) suggestionsBox.classList.add('hidden');
+        }
+
+        function updateSuggestionHighlight(items) {
+            items.forEach((it, i) => {
+                if (i === suggestionIndex) it.classList.add('bg-gray-100');
+                else it.classList.remove('bg-gray-100');
+            });
+            const el = items[suggestionIndex];
+            if (el) el.scrollIntoView({
+                block: 'nearest'
+            });
+        }
+
+        if (customerSearchInput) {
+            customerSearchInput.addEventListener('input', function() {
+                const q = this.value.trim();
+                if (!q) {
+                    suggestionsBox.classList.add('hidden');
+                    return;
+                }
+                const matches = searchCustomers(q);
+                renderSuggestions(matches);
+            });
+
+            customerSearchInput.addEventListener('keydown', function(e) {
+                const items = suggestionsBox.querySelectorAll('li');
+                if (suggestionsBox.classList.contains('hidden') || items.length === 0) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    suggestionIndex = Math.min(suggestionIndex + 1, items.length - 1);
+                    updateSuggestionHighlight(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    suggestionIndex = Math.max(suggestionIndex - 1, 0);
+                    updateSuggestionHighlight(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (suggestionIndex >= 0 && items[suggestionIndex]) {
+                        const id = items[suggestionIndex].getAttribute('data-id');
+                        pickCustomer(id);
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestionsBox.classList.add('hidden');
+                }
+            });
+
+            customerSearchInput.addEventListener('blur', function() {
+                setTimeout(() => suggestionsBox.classList.add('hidden'), 150);
+            });
         }
 
         // Event listeners

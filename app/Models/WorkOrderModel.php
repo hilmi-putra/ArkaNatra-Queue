@@ -178,4 +178,16 @@ class WorkOrderModel extends Model
     {
         return $this->hasOne(AccessCredentialModel::class, 'customer_id', 'customer_id');
     }       
+
+        // Di model WorkOrder
+    // Di WorkOrderModel
+    public function getCustomerTokenAttribute()
+    {
+        return $this->customer ? $this->customer->token : null;
+    }
+
+    public function getCustomerNameAttribute()
+    {
+        return $this->customer ? $this->customer->name : null;
+    }
 }

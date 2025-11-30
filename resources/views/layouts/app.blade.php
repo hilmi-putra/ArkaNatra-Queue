@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Crafted for agencies and studios specializing in web design and development.">
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dq0bylaa7/image/upload/v1764391033/AC_LOGO_1_v85q1j.png">
     <title>ArkaNatra - Queue</title>
 
     <!-- Font -->
@@ -35,6 +36,7 @@
 
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    
 </head>
 
 <body>
