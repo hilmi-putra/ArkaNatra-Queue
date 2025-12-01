@@ -1,47 +1,175 @@
-// Fungsi untuk menginisialisasi DataTables dengan styling Flowbite
+// Fungsi untuk memeriksa apakah tabel memiliki struktur yang valid
+function isTableStructureValid(tableElement) {
+    const $table = $(tableElement);
+
+    // Periksa apakah tabel memiliki thead dengan minimal 1 kolom
+    const headerCount = $table.find("thead th").length;
+    if (headerCount === 0) {
+        console.warn(
+            "DataTable skipped: Tabel tidak memiliki header kolom",
+            tableElement
+        );
+        return false;
+    }
+
+    // Periksa apakah tabel memiliki tbody (even jika kosong)
+    const tbody = $table.find("tbody");
+    if (tbody.length === 0) {
+        console.warn(
+            "DataTable skipped: Tabel tidak memiliki tbody",
+            tableElement
+        );
+        return false;
+    }
+
+    // Periksa konsistensi kolom pada baris data (jika ada)
+    const bodyRows = tbody.find("tr");
+    if (bodyRows.length > 0) {
+        let isConsistent = true;
+        bodyRows.each(function (index) {
+            const cellCount = $(this).find("td").length;
+            if (cellCount > 0 && cellCount !== headerCount) {
+                // Toleransi kecil untuk colspan/rowspan cases
+                if (Math.abs(cellCount - headerCount) > 1) {
+                    console.warn(
+                        `DataTable warning: Baris ${index} memiliki ${cellCount} kolom, tetapi header memiliki ${headerCount}`,
+                        tableElement
+                    );
+                    isConsistent = false;
+                }
+            }
+        });
+        if (!isConsistent) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Fungsi untuk menginisialisasi DataTables dengan styling Flowbite (dengan pengecekan keamanan)
 function initializeDataTables() {
-    // Inisialisasi hanya tabel yang memiliki class "datatable" (exclude status pages)
-    $("table.datatable").each(function () {
-        // Cek apakah tabel sudah memiliki ID, jika tidak berikan ID
-        if (!this.id) {
-            this.id = "datatable-" + Math.random().toString(36).substr(2, 9);
+    // Inisialisasi tabel dengan berbagai selector untuk kompatibilitas
+    // 1. Cari tabel dengan class "datatable"
+    // 2. Cari tabel di dalam div.card dengan structure standard (thead + tbody)
+    // 3. Cari tabel dengan class min-w-full (common pattern di app)
+    const tableSelectors = [
+        "table.datatable",
+        "div.card table[class*='min-w-full']",
+        "table[class*='divide-y']",
+    ];
+
+    const uniqueTables = new Set();
+    const tablesToInit = [];
+
+    tableSelectors.forEach((selector) => {
+        $(selector).each(function () {
+            // Hindari duplicate
+            if (!uniqueTables.has(this)) {
+                uniqueTables.add(this);
+                tablesToInit.push(this);
+            }
+        });
+    });
+
+    console.info(
+        `🔍 Ditemukan ${tablesToInit.length} tabel untuk diinisialisasi`
+    );
+
+    tablesToInit.forEach((tableElement) => {
+        // Langkah 1: Validasi struktur tabel
+        if (!isTableStructureValid(tableElement)) {
+            console.error(
+                "❌ DataTable skip: Struktur tabel tidak valid",
+                tableElement
+            );
+            return; // Skip tabel ini
         }
 
-        // Hitung jumlah kolom untuk colspan
-        const columnCount = $(this).find("thead th").length;
+        // Langkah 2: Cek apakah tabel sudah diinisialisasi sebelumnya
+        if ($.fn.DataTable.isDataTable(tableElement)) {
+            console.log(
+                "⚠️ DataTable sudah diinisialisasi, skip reinisialisasi",
+                tableElement
+            );
+            return; // Skip jika sudah ada
+        }
 
-        // Inisialisasi DataTables
-        $(this).DataTable({
-            language: {
-                search: "",
-                searchPlaceholder: "Type to search...",
-                lengthMenu: "_MENU_",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                infoEmpty: "Showing 0 to 0 of 0 entries",
-                infoFiltered: "(filtered from _MAX_ total entries)",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous",
+        // Langkah 3: Berikan ID jika tidak ada
+        if (!tableElement.id) {
+            tableElement.id =
+                "datatable-" + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Langkah 4: Hitung jumlah kolom untuk colspan
+        const columnCount = $(tableElement).find("thead th").length;
+
+        // Langkah 5: Inisialisasi DataTables dengan error handling
+        try {
+            $(tableElement).DataTable({
+                language: {
+                    search: "",
+                    searchPlaceholder: "Type to search...",
+                    lengthMenu: "_MENU_",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    infoEmpty: "Showing 0 to 0 of 0 entries",
+                    infoFiltered: "(filtered from _MAX_ total entries)",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous",
+                    },
+                    emptyTable: generateEmptyStateHTML(columnCount, "no-data"),
+                    zeroRecords: generateEmptyStateHTML(
+                        columnCount,
+                        "no-results"
+                    ),
                 },
-                emptyTable: generateEmptyStateHTML(columnCount, "no-data"),
-                zeroRecords: generateEmptyStateHTML(columnCount, "no-results"),
-            },
 
-            dom: '<"flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0"<"mb-4 md:mb-0"l><"flex items-center space-x-4"f>>rt<"flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 mt-6"<"mb-4 md:mb-0"i><"pagination"p>>',
-            initComplete: function () {
-                // Custom styling untuk elemen DataTables setelah inisialisasi
-                customizeDataTables(this);
-            },
-            drawCallback: function () {
-                // Terapkan kembali custom styling setelah setiap draw
-                customizeDataTables(this);
+                dom: '<"flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0"<"mb-4 md:mb-0"l><"flex items-center space-x-4"f>>rt<"flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 mt-6"<"mb-4 md:mb-0"i><"pagination"p>>',
+                paging: true,
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    ["10 rows", "25 rows", "50 rows", "100 rows"],
+                ],
+                searching: true,
+                ordering: true,
+                info: true,
+                stateSave: false,
+                serverSide: false,
+                responsive: true,
+                autoWidth: false,
+                retrieve: true,
+                destroy: false,
+                drawCallback: function () {
+                    // Terapkan kembali custom styling setelah setiap draw
+                    customizeDataTables(this);
 
-                // Cek apakah ada custom empty state dan styling ulang
-                styleEmptyState(this);
-            },
-        });
+                    // Cek apakah ada custom empty state dan styling ulang
+                    styleEmptyState(this);
+                },
+                initComplete: function () {
+                    // Custom styling untuk elemen DataTables setelah inisialisasi
+                    customizeDataTables(this);
+                },
+                error: function (e) {
+                    console.error("❌ DataTable initialization error:", e);
+                },
+            });
+
+            console.log(
+                "✅ DataTable berhasil diinisialisasi:",
+                tableElement.id
+            );
+        } catch (error) {
+            console.error(
+                "❌ DataTable initialization exception:",
+                error,
+                tableElement
+            );
+        }
     });
 }
 
@@ -125,226 +253,261 @@ function styleEmptyState(table) {
     }
 }
 
-// Fungsi untuk menyesuaikan styling DataTables dengan Flowbite
+// Fungsi untuk menyesuaikan styling DataTables dengan Flowbite (dengan pengecekan keamanan)
 function customizeDataTables(table) {
+    // Cek apakah table valid
+    if (!table || !table.table) {
+        console.warn("customizeDataTables: Table object tidak valid");
+        return;
+    }
+
     const wrapper = $(table.table().container());
 
-    // Custom styling untuk search input dengan margin
-    const searchInput = wrapper.find(".dataTables_filter input");
-    if (searchInput.length) {
-        searchInput.attr(
-            "class",
-            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
-        );
-        searchInput.attr("placeholder", "Type to search...");
+    // Jika wrapper kosong, keluar lebih awal
+    if (!wrapper || wrapper.length === 0) {
+        console.warn("customizeDataTables: Wrapper tidak ditemukan");
+        return;
+    }
 
-        // Tambahkan ikon pencarian dan margin
-        const searchContainer = wrapper.find(".dataTables_filter");
-
-        // Cek apakah ikon sudah ada untuk menghindari duplikasi
-        if (!searchContainer.find(".search-icon-wrapper").length) {
-            const searchInputElement = searchInput[0].outerHTML;
-            searchContainer.html(`
-                <div class="relative ml-4 search-icon-wrapper">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-neutral-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                        </svg>
-                    </div>
-                    ${searchInputElement}
-                </div>
-            `);
-
-            // Update class untuk input dengan padding kiri untuk ikon
-            const newSearchInput = wrapper.find(".dataTables_filter input");
-            newSearchInput.attr(
+    try {
+        // Custom styling untuk search input dengan margin
+        const searchInput = wrapper.find(".dataTables_filter input");
+        if (searchInput.length) {
+            searchInput.attr(
                 "class",
-                "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block pl-10 p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
+                "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
             );
+            searchInput.attr("placeholder", "Type to search...");
+
+            // Tambahkan ikon pencarian dan margin
+            const searchContainer = wrapper.find(".dataTables_filter");
+
+            // Cek apakah ikon sudah ada untuk menghindari duplikasi
+            if (!searchContainer.find(".search-icon-wrapper").length) {
+                const searchInputElement = searchInput[0].outerHTML;
+                searchContainer.html(`
+                    <div class="relative ml-4 search-icon-wrapper">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-neutral-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                        </div>
+                        ${searchInputElement}
+                    </div>
+                `);
+
+                // Update class untuk input dengan padding kiri untuk ikon
+                const newSearchInput = wrapper.find(".dataTables_filter input");
+                newSearchInput.attr(
+                    "class",
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block pl-10 p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-neutral-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
+                );
+            }
+
+            // Tambahkan margin untuk container search
+            searchContainer.addClass("mb-4");
         }
 
-        // Tambahkan margin untuk container search
-        searchContainer.addClass("mb-4");
-    }
+        // Custom styling untuk pagination dengan margin
+        const pagination = wrapper.find(".dataTables_paginate");
+        if (pagination.length) {
+            pagination.attr("class", "inline-flex mt-4 md:mt-0 space-x-2");
 
-    // Custom styling untuk length select dengan HS Dropdown style
-    // Custom styling untuk length select dengan HS Dropdown style
-    const lengthSelect = $("#search-table_length").find("select");
-    if (lengthSelect.length) {
-        // Tambahkan wrapper relatif agar bisa tempatkan dropdown custom
-        const lengthContainer = $("#search-table_length");
-        lengthContainer.addClass("relative inline-flex items-center mb-4 mr-4");
+            const paginateButtons = pagination.find(".paginate_button");
+            paginateButtons.each(function () {
+                const button = $(this);
+                let baseClass =
+                    "paginate_button inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg mx-1";
 
-        // Ambil semua opsi dari select bawaan DataTables
-        const options = lengthSelect
-            .find("option")
-            .map(function () {
-                return {
-                    value: $(this).val(),
-                    text: $(this).text(),
-                };
-            })
-            .get();
+                if (button.hasClass("current")) {
+                    button.attr(
+                        "class",
+                        baseClass +
+                            " text-white bg-orange-600 border border-orange-600 hover:bg-orange-700 hover:text-white dark:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600"
+                    );
+                } else if (button.hasClass("disabled")) {
+                    button.attr(
+                        "class",
+                        baseClass +
+                            " text-gray-300 bg-white border border-gray-200 cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
+                    );
+                } else {
+                    button.attr(
+                        "class",
+                        baseClass +
+                            " text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+                    );
+                }
+            });
 
-        // Ambil nilai yang sedang aktif
-        const currentValue = lengthSelect.val();
+            // Tambahkan margin untuk container pagination
+            pagination.addClass("my-4");
+        }
 
-        // Hapus select bawaan agar diganti dengan HS Dropdown custom
-        lengthSelect.remove();
-
-        // Tambahkan HTML HS Dropdown menggantikan select
-        lengthContainer.html(`
-            <div class="hs-dropdown [--strategy:absolute] relative inline-flex">
-                <button id="hs-table-length" type="button"
-                    class="flex justify-center items-center gap-x-3 px-3 py-2 text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-300 dark:text-neutral-400 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700">
-                    <span id="selected-length">${currentValue}</span>
-                    <svg class="shrink-0 size-4.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </button>
-
-                <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 w-32 transition-[opacity,margin] duration opacity-0 hidden z-10 bg-white border border-gray-200 rounded-xl shadow-lg before:absolute before:-top-4 before:start-0 before:w-full before:h-5 dark:bg-neutral-950 dark:border-neutral-700"
-                    role="menu" aria-orientation="vertical" aria-labelledby="hs-table-length">
-                    <div class="p-1 space-y-0.5">
-                        ${options
-                            .map(
-                                (opt) => `
-                            <button type="button"
-                                class="length-option w-full flex items-center gap-x-3 py-1.5 px-2 rounded-lg text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-800 ${
-                                    opt.value == currentValue
-                                        ? "bg-gray-100 dark:bg-neutral-800"
-                                        : ""
-                                }"
-                                data-length="${opt.value}">
-                                ${opt.text}
-                            </button>
-                        `
-                            )
-                            .join("")}
-                    </div>
-                </div>
-            </div>
-        `);
-
-        // Event handler untuk klik opsi dropdown
-        lengthContainer.on("click", ".length-option", function () {
-            const newLength = $(this).data("length");
-            const table = $("#search-table").DataTable(); // ganti sesuai ID tabel kamu
-            table.page.len(newLength).draw();
-
-            // Update label dropdown
-            $("#selected-length").text(newLength);
-
-            // Tutup dropdown manual (jika HS belum otomatis)
-            $(this)
-                .closest(".hs-dropdown-menu")
-                .addClass("hidden")
-                .removeClass("opacity-100");
-        });
-    }
-
-    // Custom styling untuk pagination dengan margin
-    const pagination = wrapper.find(".dataTables_paginate");
-    if (pagination.length) {
-        pagination.attr("class", "inline-flex mt-4 md:mt-0 space-x-2");
-
-        const paginateButtons = pagination.find(".paginate_button");
-        paginateButtons.each(function () {
-            const button = $(this);
-            let baseClass =
-                "paginate_button inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg mx-1";
-
-            if (button.hasClass("current")) {
-                button.attr(
-                    "class",
-                    baseClass +
-                        " text-white bg-orange-600 border border-orange-600 hover:bg-orange-700 hover:text-white dark:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600"
-                );
-            } else if (button.hasClass("disabled")) {
-                button.attr(
-                    "class",
-                    baseClass +
-                        " text-gray-300 bg-white border border-gray-200 cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-500"
-                );
-            } else {
-                button.attr(
-                    "class",
-                    baseClass +
-                        " text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-white"
+        // Custom styling untuk header tabel (skip untuk empty state)
+        const tableHeaders = wrapper.find("thead th");
+        tableHeaders.each(function () {
+            const header = $(this);
+            if (!header.hasClass("custom-styled")) {
+                header.addClass(
+                    "custom-styled px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200 bg-gray-50 dark:bg-neutral-900"
                 );
             }
         });
 
-        // Tambahkan margin untuk container pagination
-        pagination.addClass("my-4");
+        // Custom styling untuk baris tabel (skip untuk empty state)
+        const tableRows = wrapper.find("tbody tr");
+        tableRows.each(function () {
+            const row = $(this);
+            if (
+                !row.hasClass("dt-empty-state-row") &&
+                !row.hasClass("custom-styled-row")
+            ) {
+                row.addClass(
+                    "custom-styled-row bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+                );
+            }
+        });
+
+        // Custom styling untuk sel tabel (skip untuk empty state)
+        const tableCells = wrapper.find("tbody td");
+        tableCells.each(function () {
+            const cell = $(this);
+            const parentRow = cell.closest("tr");
+
+            if (
+                !parentRow.hasClass("dt-empty-state-row") &&
+                !cell.hasClass("whitespace-nowrap") &&
+                !cell.hasClass("custom-styled-cell")
+            ) {
+                cell.addClass(
+                    "custom-styled-cell px-6 py-4 text-sm text-gray-800 dark:text-neutral-200"
+                );
+            }
+        });
+
+        // Tambahkan margin untuk wrapper controls atas
+        const topControls = wrapper.find(".dataTables_wrapper > .flex").first();
+        if (
+            topControls.length &&
+            !topControls.hasClass("custom-styled-controls")
+        ) {
+            topControls.addClass(
+                "custom-styled-controls mb-6 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg"
+            );
+        }
+
+        // Tambahkan margin untuk wrapper controls bawah
+        const bottomControls = wrapper
+            .find(".dataTables_wrapper > .flex")
+            .last();
+        if (
+            bottomControls.length &&
+            !bottomControls.is(topControls) &&
+            !bottomControls.hasClass("custom-styled-controls")
+        ) {
+            bottomControls.addClass(
+                "custom-styled-controls mt-6 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg"
+            );
+        }
+    } catch (error) {
+        console.warn("Error in customizeDataTables:", error);
+    }
+}
+
+// Fungsi untuk deteksi dan filter tabel yang perlu DataTables
+function detectDataTables() {
+    // Cari tabel dengan berbagai pattern
+    const patterns = [
+        "table.datatable",
+        "div.card table[class*='min-w-full']",
+        "table[class*='divide-y']",
+    ];
+
+    let totalFound = 0;
+    patterns.forEach((pattern) => {
+        totalFound += $(pattern).length;
+    });
+
+    if (totalFound === 0) {
+        console.info(
+            "ℹ️ Tidak ada tabel dengan pattern datatable ditemukan di halaman ini"
+        );
+        return false;
     }
 
-    // Custom styling untuk header tabel (skip untuk empty state)
-    const tableHeaders = wrapper.find("thead th");
-    tableHeaders.each(function () {
-        const header = $(this);
-        if (!header.hasClass("custom-styled")) {
-            header.addClass(
-                "custom-styled px-6 py-3 text-start text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200 bg-gray-50 dark:bg-neutral-900"
-            );
-        }
-    });
+    console.info(
+        `🔍 Ditemukan ${totalFound} tabel untuk inisialisasi DataTables`
+    );
+    return true;
+}
 
-    // Custom styling untuk baris tabel (skip untuk empty state)
-    const tableRows = wrapper.find("tbody tr");
-    tableRows.each(function () {
-        const row = $(this);
-        if (
-            !row.hasClass("dt-empty-state-row") &&
-            !row.hasClass("custom-styled-row")
-        ) {
-            row.addClass(
-                "custom-styled-row bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800"
-            );
-        }
-    });
+// Fungsi untuk reinisialisasi DataTables ketika ada perubahan DOM (untuk AJAX/dinamis content)
+function reinitializeDataTables() {
+    // Hancurkan DataTable yang sudah ada
+    $.fn.dataTable.tables({ visible: true, api: true }).destroy();
 
-    // Custom styling untuk sel tabel (skip untuk empty state)
-    const tableCells = wrapper.find("tbody td");
-    tableCells.each(function () {
-        const cell = $(this);
-        const parentRow = cell.closest("tr");
+    // Reinisialisasi semua tabel
+    initializeDataTables();
+}
 
-        if (
-            !parentRow.hasClass("dt-empty-state-row") &&
-            !cell.hasClass("whitespace-nowrap") &&
-            !cell.hasClass("custom-styled-cell")
-        ) {
-            cell.addClass(
-                "custom-styled-cell px-6 py-4 text-sm text-gray-800 dark:text-neutral-200"
-            );
-        }
-    });
-
-    // Tambahkan margin untuk wrapper controls atas
-    const topControls = wrapper.find(".dataTables_wrapper > .flex").first();
-    if (topControls.length && !topControls.hasClass("custom-styled-controls")) {
-        topControls.addClass(
-            "custom-styled-controls mb-6 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg"
-        );
-    }
-
-    // Tambahkan margin untuk wrapper controls bawah
-    const bottomControls = wrapper.find(".dataTables_wrapper > .flex").last();
-    if (
-        bottomControls.length &&
-        !bottomControls.is(topControls) &&
-        !bottomControls.hasClass("custom-styled-controls")
-    ) {
-        bottomControls.addClass(
-            "custom-styled-controls mt-6 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg"
-        );
+// Fungsi untuk menyimpan state DataTables (pagination, search, dll)
+function saveDataTableState() {
+    try {
+        const tables = $.fn.dataTable.tables({ api: true });
+        tables.each(function () {
+            const tableId = $(this.table().node()).attr("id");
+            if (tableId) {
+                const state = this.state();
+                localStorage.setItem(
+                    `datatable_state_${tableId}`,
+                    JSON.stringify(state)
+                );
+            }
+        });
+        console.log("DataTable state tersimpan");
+    } catch (error) {
+        console.warn("Gagal menyimpan DataTable state:", error);
     }
 }
 
 // Inisialisasi saat dokumen siap
 $(document).ready(function () {
-    initializeDataTables();
+    // Bersihkan localStorage state lama (jika ada)
+    try {
+        const keysToDelete = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (
+                key &&
+                (key.includes("datatable_state") || key.includes("DataTables_"))
+            ) {
+                keysToDelete.push(key);
+            }
+        }
+        keysToDelete.forEach((key) => localStorage.removeItem(key));
+        if (keysToDelete.length > 0) {
+            console.log(
+                `🧹 Dibersihkan ${keysToDelete.length} legacy DataTable state entries`
+            );
+        }
+    } catch (error) {
+        console.warn("Warning: Could not clean localStorage", error);
+    }
+
+    // Deteksi keberadaan tabel DataTables
+    if (detectDataTables()) {
+        initializeDataTables();
+    }
+
+    // Simpan state sebelum halaman ditinggalkan
+    $(window).on("beforeunload", function () {
+        saveDataTableState();
+    });
+});
+
+// Support untuk reinisialisasi dinamis (jika ada AJAX loading content)
+$(document).on("datatables:reinit", function () {
+    console.log("Memicu reinisialisasi DataTables");
+    reinitializeDataTables();
 });

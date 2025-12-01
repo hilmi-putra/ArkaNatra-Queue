@@ -12,6 +12,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\WorkOrderIndexingController;
 use App\Http\Controllers\WorkTypeController;
+use App\Http\Controllers\LogController;
+use App\Http\Controllers\RecycleBinController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -79,6 +81,21 @@ Route::middleware(['auth', 'checkrole:admin'])
     Route::resource('work-order-indexing', WorkOrderIndexingController::class);
     
     Route::resource('work-types', WorkTypeController::class);
+
+    // Logging routes (Admin only)
+    Route::prefix('logs')->name('logs.')->group(function () {
+        Route::get('/', [LogController::class, 'index'])->name('index');
+        Route::get('/{log}', [LogController::class, 'show'])->name('show');
+        Route::get('/export', [LogController::class, 'export'])->name('export');
+    });
+
+    // Recycle Bin routes (Admin only)
+    Route::prefix('recycle-bin')->name('recycle-bin.')->group(function () {
+        Route::get('/', [RecycleBinController::class, 'index'])->name('index');
+        Route::post('/restore', [RecycleBinController::class, 'restore'])->name('restore');
+        Route::post('/force-delete', [RecycleBinController::class, 'forceDelete'])->name('force-delete');
+        Route::post('/empty', [RecycleBinController::class, 'emptyBin'])->name('empty');
+    });
 });
 
 Route::middleware(['auth', 'checkrole:production'])

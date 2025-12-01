@@ -12,10 +12,7 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
-
-            CustomerSeeder::class,
-            AccessCredentialSeeder::class,
-
+            
             WorkTypeSeeder::class,
             IndexingTypeSeeder::class,
 

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\WorkOrderModel;
 use App\Models\WorkTypeModel;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -100,6 +101,16 @@ class WorkOrderObserver
             $originalStatus = $workOrderModel->getOriginal('status');
             $newStatus = $workOrderModel->status;
 
+            // Log status change
+            if ($originalStatus !== $newStatus) {
+                ActivityLogger::logStatusChanged(
+                    'WorkOrderModel',
+                    $workOrderModel->id,
+                    $originalStatus,
+                    $newStatus
+                );
+            }
+
             // This logic triggers when a work order moves INTO the queue
             if ($newStatus === 'queue' && $originalStatus !== 'queue') {
                 // 1. Set queue date using a variable to avoid accessor issues
@@ -163,6 +174,29 @@ class WorkOrderObserver
             // Tambahkan ke antrian production baru
             $workOrderModel->antrian_ke = $this->getNextQueueNumber($newProductionId);
         }
+
+        // Log other updates
+        $oldValues = $workOrderModel->getOriginal();
+        $newValues = $workOrderModel->getAttributes();
+        $changes = [];
+        
+        foreach ($newValues as $key => $value) {
+            if ($key !== 'status' && isset($oldValues[$key]) && $oldValues[$key] !== $value) {
+                $changes[$key] = [
+                    'old' => $oldValues[$key],
+                    'new' => $value
+                ];
+            }
+        }
+
+        if (!empty($changes)) {
+            ActivityLogger::logUpdated(
+                'WorkOrderModel',
+                $workOrderModel->id,
+                $oldValues,
+                $newValues
+            );
+        }
     }
 
     /**
@@ -171,9 +205,54 @@ class WorkOrderObserver
      */
     public function created(WorkOrderModel $workOrderModel): void
     {
+        // Log activity
+        ActivityLogger::logCreated(
+            'WorkOrderModel',
+            $workOrderModel->id,
+            $workOrderModel->toArray()
+        );
+
         if ($workOrderModel->status === 'queue') {
             $workOrderModel->antrian_ke = $this->getNextQueueNumber($workOrderModel->production_id);
             $workOrderModel->saveQuietly(); // Gunakan saveQuietly untuk menghindari loop observer
         }
+    }
+
+    /**
+     * Handle the WorkOrderModel "deleted" event (soft delete).
+     */
+    public function deleted(WorkOrderModel $workOrderModel): void
+    {
+        ActivityLogger::logDeleted(
+            'WorkOrderModel',
+            $workOrderModel->id,
+            $workOrderModel->getAttributes()
+        );
+    }
+
+    /**
+     * Handle the WorkOrderModel "restored" event.
+     */
+    public function restored(WorkOrderModel $workOrderModel): void
+    {
+        ActivityLogger::logRestored(
+            'WorkOrderModel',
+            $workOrderModel->id
+        );
+    }
+
+    /**
+     * Handle the WorkOrderModel "force deleted" event.
+     */
+    public function forceDeleted(WorkOrderModel $workOrderModel): void
+    {
+        ActivityLogger::log(
+            'deleted',
+            'WorkOrderModel',
+            $workOrderModel->id,
+            'Work Order has been permanently deleted',
+            $workOrderModel->getAttributes(),
+            null
+        );
     }
 }

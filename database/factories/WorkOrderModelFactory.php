@@ -47,24 +47,20 @@ class WorkOrderModelFactory extends Factory
             'work_type_id' => $workTypeId,
             'sales_id' => $salesId,
             'production_id' => $productionId,
-            'domain' => $this->faker->domainName,
-            'quantity' => $this->faker->numberBetween(1, 3),
-            'description' => $this->faker->sentence,
-            'status' => 'queue',                 // Ubah jadi QUEUE
-            'fast_track' => $this->faker->boolean(25),
+            'domain' => 'example-' . Str::random(8) . '.com',
+            'quantity' => rand(1, 3),
+            'description' => 'Sample work order description',
+            'status' => 'queue',
+            'fast_track' => rand(0, 100) > 75 ? 1 : 0,
             'date_received' => now()->toDateString(),
-            'date_queue' => now()->toDateString(), // biasanya kalau QUEUE harus punya date_queue
+            'date_queue' => now()->toDateString(),
             'estimasi_date' => null,
-            
-            // ⭐ Antrian ke berurutan
             'antrian_ke' => self::$queueNumber++,
-
             'revision_count' => 0,
             'date_completed' => null,
             'file_mou' => null,
             'file_work_form' => null,
             'additional_file' => null,
         ];
-
     }
 }

@@ -71,18 +71,24 @@
                         @enderror
                     </div>
 
+                    <!-- Checkbox dengan design Preline -->
                     <div class="sm:col-span-3">
-                        <label for="finished" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
-                            Finished
+                        <label class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            Status
                         </label>
                     </div>
 
                     <div class="sm:col-span-9">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" id="finished" name="finished" value="1" class="mr-2"
+                        <div class="flex">
+                            <input type="checkbox" id="finished" name="finished" value="1"
+                                class="shrink-0 mt-0.5 border-gray-300 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-600 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
                                 {{ old('finished', isset($workOrderIndexing) ? $workOrderIndexing->finished : '') ? 'checked' : '' }}>
-                            <span class="text-sm text-gray-700 dark:text-neutral-300">Tandai sebagai selesai</span>
-                        </label>
+                            <label for="finished" class="text-sm text-gray-600 ms-3 dark:text-neutral-400">
+                                <span class="font-medium text-gray-800 dark:text-neutral-200">Tandai sebagai selesai</span>
+                                <p class="text-xs text-gray-500 mt-0.5 dark:text-neutral-500">Centang jika indexing sudah
+                                    selesai dikerjakan</p>
+                            </label>
+                        </div>
                         @error('finished')
                             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                         @enderror

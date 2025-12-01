@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>DataTables Test</title>
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+        />
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css"
+        />
+        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+            }
+            .test-card {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }
+            .status {
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 4px;
+            }
+            .status.success {
+                background-color: #d4edda;
+                color: #155724;
+            }
+            .status.info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+            }
+            .status.error {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🧪 DataTables Global Script Test</h1>
+
+        <div
+            id="console-output"
+            class="test-card"
+            style="
+                background-color: #f5f5f5;
+                max-height: 300px;
+                overflow-y: auto;
+                font-family: monospace;
+                font-size: 12px;
+            "
+        >
+            <h3>Console Output:</h3>
+            <div id="logs"></div>
+        </div>
+
+        <!-- Test Case 1: Table with class "datatable" -->
+        <div class="test-card">
+            <h2>Test 1: Table with class "datatable"</h2>
+            <table class="datatable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>John Doe</td>
+                        <td>john@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Jane Smith</td>
+                        <td>jane@example.com</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Bob Johnson</td>
+                        <td>bob@example.com</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Test Case 2: Table with min-w-full class (like in app) -->
+        <div class="test-card">
+            <h2>Test 2: Table with min-w-full class (Real App Pattern)</h2>
+            <div class="card">
+                <table
+                    class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700"
+                >
+                    <thead class="bg-gray-50 dark:bg-neutral-800">
+                        <tr>
+                            <th class="px-6 py-3 text-start">ID</th>
+                            <th class="px-6 py-3 text-start">Title</th>
+                            <th class="px-6 py-3 text-start">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="divide-y divide-gray-200 dark:divide-neutral-700"
+                    >
+                        <tr>
+                            <td class="px-6 py-4">WO-001</td>
+                            <td class="px-6 py-4">Project A</td>
+                            <td class="px-6 py-4">Queue</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4">WO-002</td>
+                            <td class="px-6 py-4">Project B</td>
+                            <td class="px-6 py-4">Progress</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Test Case 3: Empty Table -->
+        <div class="test-card">
+            <h2>Test 3: Empty Table</h2>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3">Ref ID</th>
+                        <th class="px-6 py-3">Customer</th>
+                        <th class="px-6 py-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-card">
+            <h2>Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <script>
+            // Intercept console.log/warn/error
+            const logs = [];
+            const originalLog = console.log;
+            const originalWarn = console.warn;
+            const originalError = console.error;
+            const originalInfo = console.info;
+
+            console.log = function (...args) {
+                logs.push({ type: "log", msg: args.join(" ") });
+                originalLog.apply(console, args);
+                updateLogs();
+            };
+            console.warn = function (...args) {
+                logs.push({ type: "warn", msg: args.join(" ") });
+                originalWarn.apply(console, args);
+                updateLogs();
+            };
+            console.error = function (...args) {
+                logs.push({ type: "error", msg: args.join(" ") });
+                originalError.apply(console, args);
+                updateLogs();
+            };
+            console.info = function (...args) {
+                logs.push({ type: "info", msg: args.join(" ") });
+                originalInfo.apply(console, args);
+                updateLogs();
+            };
+
+            function updateLogs() {
+                const logsDiv = document.getElementById("logs");
+                logsDiv.innerHTML = logs
+                    .map((log) => {
+                        let color = "#000";
+                        if (log.type === "error") color = "#d32f2f";
+                        if (log.type === "warn") color = "#f57c00";
+                        if (log.type === "info") color = "#1976d2";
+                        return `<div style="color: ${color}">[${log.type.toUpperCase()}] ${
+                            log.msg
+                        }</div>`;
+                    })
+                    .join("");
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+            }
+
+            // Load global-datatables.js
+            const script = document.createElement("script");
+            script.src = "/js/global-datatables.js";
+            script.onload = function () {
+                console.log("✅ global-datatables.js loaded successfully");
+
+                // Run tests after a short delay
+                setTimeout(function () {
+                    runTests();
+                }, 500);
+            };
+            script.onerror = function () {
+                console.error("❌ Failed to load global-datatables.js");
+            };
+            document.head.appendChild(script);
+
+            function runTests() {
+                console.log("\n=== RUNNING TESTS ===\n");
+
+                // Test 1: Check if DataTables instances exist
+                const instances = $.fn.dataTable.tables().length;
+                console.log(`Test 1: Found ${instances} DataTable instances`);
+
+                // Test 2: Check table detection
+                const table1 = $("table.datatable").length;
+                const table2 = $('div.card table[class*="min-w-full"]').length;
+                const table3 = $('table[class*="divide-y"]').length;
+                console.log(
+                    `Test 2: Table detection - datatable: ${table1}, min-w-full: ${table2}, divide-y: ${table3}`
+                );
+
+                // Test 3: Check if styling applied
+                const styledHeaders = $("table thead th.custom-styled").length;
+                console.log(`Test 3: Styled headers found: ${styledHeaders}`);
+
+                // Display results
+                const resultsDiv = document.getElementById("test-results");
+                resultsDiv.innerHTML = `
+                <div class="status success">✅ DataTable Instances: ${instances}</div>
+                <div class="status info">ℹ️ Tables with min-w-full pattern: ${table2}</div>
+                <div class="status ${instances > 0 ? "success" : "error"}">
+                    ${
+                        instances > 0
+                            ? "✅ DataTables initialized successfully!"
+                            : "❌ No DataTable instances found"
+                    }
+                </div>
+            `;
+
+                console.log("\n=== TESTS COMPLETED ===\n");
+            }
+        </script>
+    </body>
+</html>

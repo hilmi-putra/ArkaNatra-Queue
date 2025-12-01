@@ -554,31 +554,46 @@ dark:bg-neutral-900"
         <footer class="mt-auto p-3 flex flex-col">
             <!-- List -->
             <ul class="flex flex-col gap-y-1">
-                <li>
-                    <a class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800 dark:text-neutral-200"
-                        href="#">
-                        <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path
-                                d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-                        </svg>
-                        What's new?
-                    </a>
-                </li>
-                <li>
-                    <a class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800 dark:text-neutral-200"
-                        href="#">
-                        <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-                        </svg>
-                        Help & support
-                    </a>
-                </li>
+                <!-- Activity Logs (Admin only) -->
+                @if ($role === 'admin')
+                    <li>
+                        @php $isActive = request()->routeIs($prefix . 'logs.*'); @endphp
+                        <a href="{{ route($prefix . 'logs.index') }}"
+                            class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 dark:text-neutral-200 dark:hover:bg-neutral-800 {{ $isActive ? 'active-link' : '' }}">
+                            <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M9 11H3v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5" />
+                                <path d="M9 5a3 3 0 0 0 3 3h3a3 3 0 0 0 3-3" />
+                                <path d="M9 3h6M8 11h8v1H8z" />
+                            </svg>
+                            Activity Logs
+                        </a>
+                    </li>
+                @endif
+
+                <!-- Recycle Bin (Admin only) -->
+                @if ($role === 'admin')
+                    <li>
+                        @php $isActive = request()->routeIs($prefix . 'recycle-bin.*'); @endphp
+                        <a href="{{ route($prefix . 'recycle-bin.index') }}"
+                            class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 dark:text-neutral-200 dark:hover:bg-neutral-800 {{ $isActive ? 'active-link' : '' }}">
+                            <svg class="shrink-0 size-4 text-gray-600 dark:text-neutral-400"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                            Recycle Bin
+                        </a>
+                    </li>
+                @endif
+
                 <li class="lg:hidden">
                     <a class="w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800 dark:text-neutral-200"
                         href="#">

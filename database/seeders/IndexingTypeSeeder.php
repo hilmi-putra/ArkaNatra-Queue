@@ -11,15 +11,15 @@ class IndexingTypeSeeder extends Seeder
     {
         $types = [
             [
-                'indexing_name' => 'Title',
+                'indexing_name' => 'ISSN',
                 'description' => 'Indexing by title'
             ],
             [
-                'indexing_name' => 'Author',
+                'indexing_name' => 'Google Schollar',
                 'description' => 'Indexing by author name'
             ],
             [
-                'indexing_name' => 'Keywords',
+                'indexing_name' => 'DOI',
                 'description' => 'Indexing based on keywords'
             ],
         ];
