@@ -195,7 +195,7 @@
                                 {{ $queue->customer_name ?? 'N/A' }}
                             </p>
                             <p class="text-xs text-gray-600 dark:text-gray-400">
-                                {{ $queue->work_type ?? 'N/A' }}
+                                {{ $queue->workType->work_type ?? 'N/A' }}
                             </p>
                         </div>
                     </div>

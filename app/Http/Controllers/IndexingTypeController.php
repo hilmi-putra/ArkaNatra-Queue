@@ -9,7 +9,7 @@ class IndexingTypeController extends Controller
 {
     public function index()
     {
-        $data = IndexingTypeModel::paginate(10);
+        $data = IndexingTypeModel::get();
         return view('indexing-types.index', compact('data'));
     }
 

@@ -11,7 +11,7 @@ class WorkOrderIndexingController extends Controller
 {
     public function index()
     {
-        $data = WorkOrderIndexingModel::with(['workOrder', 'indexingType'])->paginate(10);
+        $data = WorkOrderIndexingModel::with(['workOrder', 'indexingType'])->get();
         return view('work-order-indexings.index', compact('data'));
     }
 

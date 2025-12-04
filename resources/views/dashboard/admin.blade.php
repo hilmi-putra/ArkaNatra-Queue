@@ -292,7 +292,7 @@
                     <line x1="12" x2="12" y1="9" y2="13" />
                     <line x1="12" x2="12.01" y1="17" y2="17" />
                 </svg>
-                Migrasi Terlama
+                Menunggu Migrasi Terlama
             </h2>
         </div>
         <div class="p-4 space-y-3 max-h-80 overflow-y-auto">
@@ -347,7 +347,7 @@
                         </span>
 
                         <span class="text-gray-500 dark:text-neutral-500">
-                            {{ $migration->migration_duration ?? 'N/A' }}
+                            {{ $migration->date_migration ?? 'N/A' }}
                         </span>
                     </div>
                 </div>

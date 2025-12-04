@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="w-full">
+    <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <!-- Header -->
         <div class="mb-6">
             <a href="{{ route('admin.logs.index') }}"

@@ -10,7 +10,7 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $data = CustomerModel::with(['workOrders', 'accessCredentials'])->paginate(10);
+        $data = CustomerModel::with(['workOrders', 'accessCredentials'])->get();
 
         return view('customers.index', compact('data'));
     }

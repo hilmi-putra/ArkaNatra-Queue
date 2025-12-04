@@ -70,6 +70,7 @@ Route::middleware(['auth', 'checkrole:admin'])
     Route::get('/work-orders/status/revision', [WorkOrderController::class, 'showRevision'])->name('work-orders.status.revision');
     Route::get('/work-orders/status/migration', [WorkOrderController::class, 'showMigration'])->name('work-orders.status.migration');
     Route::get('/work-orders/status/finish', [WorkOrderController::class, 'showFinish'])->name('work-orders.status.finish');
+    Route::get('/work-orders/status/cancelled', [WorkOrderController::class, 'showCancelled'])->name('work-orders.status.cancelled');
 
     Route::resource('access-credentials', AccessCredentialController::class);
     
@@ -123,11 +124,16 @@ Route::middleware(['auth', 'checkrole:production'])
     Route::get('/work-orders/status/revision', [WorkOrderController::class, 'showRevision'])->name('work-orders.status.revision');
     Route::get('/work-orders/status/migration', [WorkOrderController::class, 'showMigration'])->name('work-orders.status.migration');
     Route::get('/work-orders/status/finish', [WorkOrderController::class, 'showFinish'])->name('work-orders.status.finish');
+    Route::get('/work-orders/status/cancelled', [WorkOrderController::class, 'showCancelled'])->name('work-orders.status.cancelled');
     
     // Access Credentials Routes for Production
     Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
     Route::get('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData'])->name('work-orders.email-data');
     Route::post('/work-orders/{workOrder}/email-data', [AccessCredentialController::class, 'getEmailData']); // For password verification
+
+     // Cancelled dengan verifikasi password
+    Route::post('work-orders/{workOrder}/cancel', [WorkOrderController::class, 'cancelWithVerification'])
+        ->name('work-orders.cancel');
 
     Route::get('/work-types', [WorkTypeController::class, 'index'])->name('work-types.index');
 });
@@ -156,6 +162,7 @@ Route::middleware(['auth', 'checkrole:sales'])
     Route::get('/work-orders/status/revision', [WorkOrderController::class, 'showRevision'])->name('work-orders.status.revision');
     Route::get('/work-orders/status/migration', [WorkOrderController::class, 'showMigration'])->name('work-orders.status.migration');
     Route::get('/work-orders/status/finish', [WorkOrderController::class, 'showFinish'])->name('work-orders.status.finish');
+    Route::get('/work-orders/status/cancelled', [WorkOrderController::class, 'showCancelled'])->name('work-orders.status.cancelled');
     
     // Access Credentials Routes for Sales
     Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');
@@ -183,6 +190,7 @@ Route::middleware(['auth', 'checkrole:asservice'])
     Route::get('/work-orders/status/revision', [WorkOrderController::class, 'showRevision'])->name('work-orders.status.revision');
     Route::get('/work-orders/status/migration', [WorkOrderController::class, 'showMigration'])->name('work-orders.status.migration');
     Route::get('/work-orders/status/finish', [WorkOrderController::class, 'showFinish'])->name('work-orders.status.finish');
+    Route::get('/work-orders/status/cancelled', [WorkOrderController::class, 'showCancelled'])->name('work-orders.status.cancelled');
 
     // Access Credentials Routes for AsService
     Route::post('/work-orders/{workOrder}/send-access', [AccessCredentialController::class, 'updateSendAccess'])->name('work-orders.send-access');

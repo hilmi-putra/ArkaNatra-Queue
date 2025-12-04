@@ -136,6 +136,7 @@
 <!-- Include Modals -->
 @include('work-orders.components.modal-send-access')
 @include('work-orders.components.modal-send-email')
+@include('work-orders.components.cancel-confirmation-modal')
 
 <script>
     window.addEventListener('load', () => {

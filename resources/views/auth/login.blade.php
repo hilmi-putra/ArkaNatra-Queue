@@ -68,10 +68,12 @@
                         <div>
                             <label for="email" class="block text-sm mb-2 dark:text-white">Email address</label>
                             <div class="relative">
-                                <input type="email" id="email" name="email"
+                                <!-- Ubah dari type="email" menjadi type="text" -->
+                                <input type="text" id="email" name="email"
                                     class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 
-                                       @error('email') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
-                                    value="{{ old('email') }}" required aria-describedby="email-error">
+                                    @error('email') border-red-500 focus:border-red-500 focus:ring-red-500 @enderror"
+                                    value="{{ old('email') }}" placeholder="Masukkan email atau username" required
+                                    autocomplete="username" aria-describedby="email-error">
 
                                 @error('email')
                                     <div class="absolute inset-y-0 end-0 pointer-events-none pe-3">

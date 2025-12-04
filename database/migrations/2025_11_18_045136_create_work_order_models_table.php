@@ -16,7 +16,7 @@ return new class extends Migration
 
         $table->enum('status', [
             'validate', 'queue', 'pending', 'progress',
-            'revision', 'migration', 'finish'
+            'revision', 'migration', 'finish', 'cancelled'
         ])->default('validate');
         // Index frequently filtered column
         $table->index('status');
@@ -84,6 +84,7 @@ return new class extends Migration
         $table->date('date_migration')->nullable();
         $table->integer('revision_count')->default(0);
         $table->date('date_completed')->nullable();
+        $table->date('date_cancelled')->nullable();
 
         $table->timestamps();
         $table->softDeletes();

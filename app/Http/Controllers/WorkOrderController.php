@@ -8,10 +8,14 @@ use App\Models\AccessCredentialModel;
 use App\Models\DivisionModel;
 use App\Models\User;
 use App\Models\WorkTypeModel;
+use App\Models\IndexingTypeModel;
+use App\Models\WorkOrderIndexingModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash; // <-- Tambahkan ini
+use Illuminate\Support\Facades\Auth; // Juga tambahkan Auth untuk konsistensi
 
 class WorkOrderController extends Controller
 {
@@ -51,7 +55,7 @@ class WorkOrderController extends Controller
         $data = $query->orderByRaw($statusOrderCase)
                     ->orderByRaw('CASE WHEN antrian_ke IS NULL THEN 1 ELSE 0 END')
                     ->orderBy('antrian_ke', 'asc')
-                                ->paginate(10);
+                                ->get();
 
         if ($request->ajax()) {
             $html = view('work-orders.partials.table-rows', compact('data'))->render();
@@ -99,6 +103,7 @@ class WorkOrderController extends Controller
         $customers = CustomerModel::all();
         $salesUsers = User::role('sales')->get();
         $productionUsers = User::role('production')->get();
+        $indexingTypes = IndexingTypeModel::all();
         
         // Build work type to division mapping
         $workTypeDivisionMap = $workTypes->mapWithKeys(function ($workType) {
@@ -110,7 +115,7 @@ class WorkOrderController extends Controller
             ];
         })->toArray();
         
-        return view('work-orders.form', compact('divisions', 'workTypes', 'customers', 'productionUsers', 'salesUsers', 'workTypeDivisionMap'));
+        return view('work-orders.form', compact('divisions', 'workTypes', 'customers', 'productionUsers', 'salesUsers', 'workTypeDivisionMap', 'indexingTypes'));
     }
 
     public function store(Request $request)
@@ -136,6 +141,10 @@ class WorkOrderController extends Controller
                 'access_types' => 'nullable|array',
                 'access_types.*' => 'in:ojs,cpanel,webmail,website',
                 'access_note' => 'nullable|string',
+                
+                // Indexing Types
+                'indexing_types' => 'nullable|array',
+                'indexing_types.*' => 'exists:table_indexing_types,id',
             ];
 
             // Tambahkan validasi untuk access credentials jika ada access_types
@@ -301,6 +310,17 @@ class WorkOrderController extends Controller
                 $accessCredential->save();
             }
 
+            // 6. Create Work Order Indexing
+            if ($request->has('indexing_types')) {
+                foreach ($request->indexing_types as $indexingTypeId) {
+                    WorkOrderIndexingModel::create([
+                        'work_order_id' => $workOrder->id,
+                        'indexing_type_id' => $indexingTypeId,
+                        'finished' => false,
+                    ]);
+                }
+            }
+
             return redirect()->route('asservice.work-orders.index')
                 ->with('success', 'Work Order berhasil dibuat');
         });
@@ -314,10 +334,10 @@ class WorkOrderController extends Controller
      * @param int $length
      * @return string
      */
-    private function generateRandomToken($length = 10)
+    private function generateRandomToken($length = 12)
     {
-        // Karakter yang akan digunakan
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_-+=[]{}|;:,.<>?';
+        // Karakter yang akan digunakan (tanpa karakter khusus yang bermasalah)
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         
         $token = '';
         $max = strlen($characters) - 1;
@@ -328,6 +348,7 @@ class WorkOrderController extends Controller
         
         return $token;
     }
+
     // Helper method untuk mengecek apakah ada data access
     private function hasAccessData($data, $accessType)
     {
@@ -370,6 +391,7 @@ class WorkOrderController extends Controller
         $customers = CustomerModel::all();
         $salesUsers = User::role('sales')->get();
         $productionUsers = User::role('production')->get();
+        $indexingTypes = IndexingTypeModel::all();
         
         // Build work type to division mapping
         $workTypeDivisionMap = $workTypes->mapWithKeys(function ($workType) {
@@ -384,7 +406,7 @@ class WorkOrderController extends Controller
         // Pass user role to view for conditional rendering
         $isProduction = $user->hasRole('production');
         
-        return view('work-orders.form', compact('workOrder', 'divisions', 'workTypes', 'customers', 'productionUsers', 'salesUsers', 'isProduction', 'workTypeDivisionMap'));
+        return view('work-orders.form', compact('workOrder', 'divisions', 'workTypes', 'customers', 'productionUsers', 'salesUsers', 'isProduction', 'workTypeDivisionMap', 'indexingTypes'));
     }
 
     public function update(Request $request, $id)
@@ -413,6 +435,8 @@ class WorkOrderController extends Controller
                     'access_types' => 'nullable|array',
                     'access_types.*' => 'in:ojs,cpanel,webmail,website',
                     'access_note' => 'nullable|string',
+                    'indexing_types' => 'nullable|array',
+                    'indexing_types.*' => 'exists:table_indexing_types,id',
                 ];
 
                 // Add access credentials validation if present
@@ -461,6 +485,10 @@ class WorkOrderController extends Controller
                     'access_types' => 'nullable|array',
                     'access_types.*' => 'in:ojs,cpanel,webmail,website',
                     'access_note' => 'nullable|string',
+                    
+                    // Indexing Types
+                    'indexing_types' => 'nullable|array',
+                    'indexing_types.*' => 'exists:table_indexing_types,id',
                 ];
 
                 // Tambahkan validasi untuk access credentials jika ada access_types
@@ -600,6 +628,24 @@ class WorkOrderController extends Controller
                 } else {
                     // Production tidak memilih access types, hapus semua untuk customer ini
                     AccessCredentialModel::where('customer_id', $workOrder->customer_id)->delete();
+                }
+
+                // Update Work Order Indexing (Production dapat update indexing)
+                if ($request->has('indexing_types')) {
+                    // Hapus existing indexing
+                    WorkOrderIndexingModel::where('work_order_id', $workOrder->id)->delete();
+                    
+                    // Buat indexing baru
+                    foreach ($request->indexing_types as $indexingTypeId) {
+                        WorkOrderIndexingModel::create([
+                            'work_order_id' => $workOrder->id,
+                            'indexing_type_id' => $indexingTypeId,
+                            'finished' => false,
+                        ]);
+                    }
+                } else {
+                    // Jika tidak ada indexing dipilih, hapus semua
+                    WorkOrderIndexingModel::where('work_order_id', $workOrder->id)->delete();
                 }
                 
                 $workOrder->save();
@@ -768,6 +814,24 @@ class WorkOrderController extends Controller
                 } else {
                     AccessCredentialModel::where('customer_id', $customer->id)->delete();
                 }
+
+                // 5. Update Work Order Indexing (AsService update)
+                if ($request->has('indexing_types')) {
+                    // Hapus existing indexing
+                    WorkOrderIndexingModel::where('work_order_id', $workOrder->id)->delete();
+                    
+                    // Buat indexing baru
+                    foreach ($request->indexing_types as $indexingTypeId) {
+                        WorkOrderIndexingModel::create([
+                            'work_order_id' => $workOrder->id,
+                            'indexing_type_id' => $indexingTypeId,
+                            'finished' => false,
+                        ]);
+                    }
+                } else {
+                    // Jika tidak ada indexing dipilih, hapus semua
+                    WorkOrderIndexingModel::where('work_order_id', $workOrder->id)->delete();
+                }
             }
 
             $role = auth()->user()->getRoleNames()->first();
@@ -801,101 +865,138 @@ class WorkOrderController extends Controller
  * Generate random token dengan kombinasi lengkap
  */
 
-    public function show($id)
-    {
-        $workOrder = WorkOrderModel::with(['customer', 'accessCredentials', 'division', 'workType'])->findOrFail($id);
+    public function show($id) { 
+        $workOrder = WorkOrderModel::with(['customer', 'customer.accessCredentials', 'division', 'workType', 'workOrderIndexing.indexingType', 'salesUser', 'productionUser'])->findOrFail($id); 
         return view('work-orders.show', compact('workOrder'));
     }
 
     public function destroy($id)
     {
         $workOrder = WorkOrderModel::findOrFail($id);
+
+        // Cek status
+        if (!in_array($workOrder->status, ['validate', 'pending', 'cancelled'])) {
+            return redirect()->route('asservice.work-orders.index')
+                ->with('error', 'Work Order tidak dapat dihapus karena status bukan validate, pending, Cancelled.');
+        }
+
+        // Jika status valid, hapus
         $workOrder->delete();
 
         return redirect()->route('asservice.work-orders.index')
-            ->with('success', 'Work Order berhasil dihapus');
+            ->with('success', 'Work Order berhasil dihapus.');
     }
+
 
 
     public function updateStatus(Request $request, WorkOrderModel $workOrder)
-{
-    $validated = $request->validate([
-        'status' => [
-            'required',
-            \Illuminate\Validation\Rule::in(['validate', 'queue', 'pending', 'progress', 'revision', 'migration', 'finish']),
-        ],
-    ]);
-
-    $newStatus = $validated['status'];
-    
-    // Status names for better messages
-    $statusNames = [
-        'validate' => 'Validate',
-        'queue' => 'Queue',
-        'pending' => 'Pending', 
-        'progress' => 'In Progress',
-        'revision' => 'Revision',
-        'migration' => 'Migration',
-        'finish' => 'Finished'
-    ];
-
-    // Do nothing if the status has not changed
-    if ($workOrder->status === $newStatus) {
-        return response()->json([
-            'success' => true, 
-            'message' => 'Status is already ' . ($statusNames[$newStatus] ?? $newStatus)
+    {
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                \Illuminate\Validation\Rule::in(['validate', 'queue', 'pending', 'progress', 'revision', 'migration', 'finish', 'cancelled']),
+            ],
+            'password' => 'nullable|string', // Password required only for cancelled status
         ]);
-    }
 
-    try {
-        // Jika berpindah ke status queue, pastikan production_id ada
-        if ($newStatus === 'queue' && !$workOrder->production_id) {
+        $newStatus = $validated['status'];
+        
+        // Status names for better messages
+        $statusNames = [
+            'validate' => 'Validate',
+            'queue' => 'Queue',
+            'pending' => 'Pending', 
+            'progress' => 'In Progress',
+            'revision' => 'Revision',
+            'migration' => 'Migration',
+            'finish' => 'Finished',
+            'cancelled' => 'Cancelled'
+        ];
+
+        // Do nothing if the status has not changed
+        if ($workOrder->status === $newStatus) {
+            return response()->json([
+                'success' => true, 
+                'message' => 'Status is already ' . ($statusNames[$newStatus] ?? $newStatus)
+            ]);
+        }
+
+        try {
+            // Handle cancelled status with password verification
+            if ($newStatus === 'cancelled') {
+                // Validate password is provided
+                if (!isset($validated['password']) || empty($validated['password'])) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Password diperlukan untuk membatalkan Work Order'
+                    ], 422);
+                }
+
+                // Get current user
+                $user = auth()->user();
+                
+                // Verify password using Hash::check
+                if (!\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Password yang Anda masukkan tidak sesuai'
+                    ], 422);
+                }
+            }
+
+            // Jika berpindah ke status queue, pastikan production_id ada
+            if ($newStatus === 'queue' && !$workOrder->production_id) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Cannot move to queue without production assignment'
+                ], 422);
+            }
+
+            // Set the new status
+            $workOrder->status = $newStatus;
+
+            // Jika status diupdate ke 'finish', set date_completed ke waktu sekarang
+            if ($newStatus === 'finish') {
+                $workOrder->date_completed = now();
+            }
+
+            // Jika status diupdate ke 'revision', set date_revision ke waktu sekarang
+            if ($newStatus === 'revision') {
+                $workOrder->date_revision = now();
+            }
+
+            // Jika status diupdate ke 'migration', set date_migration ke waktu sekarang
+            if ($newStatus === 'migration') {
+                $workOrder->date_migration = now();
+            }
+
+            // Jika status diupdate ke 'cancelled', set date_cancelled ke waktu sekarang
+            if ($newStatus === 'cancelled') {
+                $workOrder->date_cancelled = now();
+            }
+
+            $workOrder->save();
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Status successfully updated to ' . ($statusNames[$newStatus] ?? $newStatus),
+                'queue_info' => $newStatus === 'queue' ? [
+                    'production_id' => $workOrder->production_id,
+                    'antrian_ke' => $workOrder->antrian_ke,
+                    'total_in_queue' => WorkOrderModel::getQueueCount($workOrder->production_id)
+                ] : null
+            ]);
+
+        } catch (\Exception $e) {
+            // Log the exception for debugging
+            \Illuminate\Support\Facades\Log::error('Failed to update status: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false, 
-                'message' => 'Cannot move to queue without production assignment'
-            ], 422);
+                'message' => 'Failed to update status: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Set the new status
-        $workOrder->status = $newStatus;
-
-        // Jika status diupdate ke 'finish', set date_completed ke waktu sekarang
-        if ($newStatus === 'finish') {
-            $workOrder->date_completed = now();
-        }
-
-        // Jika status diupdate ke 'revision', set date_revision ke waktu sekarang
-        if ($newStatus === 'revision') {
-            $workOrder->date_revision = now();
-        }
-
-        // Jika status diupdate ke 'migration', set date_migration ke waktu sekarang
-        if ($newStatus === 'migration') {
-            $workOrder->date_migration = now();
-        }
-
-        $workOrder->save();
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Status successfully updated to ' . ($statusNames[$newStatus] ?? $newStatus),
-            'queue_info' => $newStatus === 'queue' ? [
-                'production_id' => $workOrder->production_id,
-                'antrian_ke' => $workOrder->antrian_ke,
-                'total_in_queue' => WorkOrderModel::getQueueCount($workOrder->production_id)
-            ] : null
-        ]);
-
-    } catch (\Exception $e) {
-        // Log the exception for debugging
-        \Illuminate\Support\Facades\Log::error('Failed to update status: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false, 
-            'message' => 'Failed to update status: ' . $e->getMessage()
-        ], 500);
     }
-}
 
 /**
  * Mendapatkan daftar antrian berdasarkan production_id
@@ -933,6 +1034,45 @@ public function getQueueByProduction(Request $request, $productionId = null)
         ], 500);
     }
 }
+
+public function cancelWithVerification(Request $request, WorkOrderModel $workOrder)
+    {
+        $request->validate([
+            'password' => 'required|string',
+            'reason' => 'nullable|string|max:500'
+        ]);
+
+        // Verifikasi password user
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password salah! Silakan coba lagi.'
+            ], 401);
+        }
+
+        // Cek apakah work order bisa dibatalkan
+        if (!in_array($workOrder->status, ['pending', 'queue', 'validate', 'progress', 'revision'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Work Order dengan status ' . ucfirst($workOrder->status) . ' tidak dapat dibatalkan.'
+            ], 400);
+        }
+
+        // Update status ke cancelled
+        $workOrder->update([
+            'status' => 'cancelled',
+            'date_cancelled' => now(),
+        ]);
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Work Order berhasil dibatalkan.',
+            'status' => 'cancelled'
+        ]);
+    }
+
 
 /**
  * ==================== STATUS-BASED VIEW METHODS ====================
@@ -991,7 +1131,8 @@ public function getQueueByProduction(Request $request, $productionId = null)
             'salesUser:id,name',
             'productionUser:id,name',
             'division:id,name',
-            'workType:id,work_type'
+            'workType:id,work_type',
+            'workOrderIndexing.indexingType:id,indexing_name'
         ]);
     
     // Apply role-based filter
@@ -1177,5 +1318,39 @@ public function getQueueByProduction(Request $request, $productionId = null)
         ->paginate($perPage);
     
     return view('work-orders.status.finish', compact('data'));
+}
+
+/**
+ * Tampilkan work orders dengan status CANCELLED
+ */
+public function showCancelled(Request $request)
+{
+    $user = auth()->user();
+    $perPage = 10;
+    
+    $query = WorkOrderModel::where('status', 'cancelled')
+        ->select(['id', 'ref_id', 'antrian_ke', 'customer_id', 'sales_id', 'production_id', 
+                  'division_id', 'work_type_id', 'quantity', 'fast_track', 'date_received', 
+                  'date_cancelled', 'estimasi_date', 'status'])
+        ->with([
+            'customer:id,name,email,token',
+            'salesUser:id,name',
+            'productionUser:id,name',
+            'division:id,name',
+            'workType:id,work_type'
+        ]);
+    
+    // Apply role-based filter
+    if ($user->hasRole('production')) {
+        $query->where('production_id', $user->id);
+    } elseif ($user->hasRole('sales')) {
+        $query->where('sales_id', $user->id);
+    }
+    
+    // Order by date_cancelled (most recent cancellation first)
+    $data = $query->orderBy('date_cancelled', 'desc')
+        ->paginate($perPage);
+    
+    return view('work-orders.status.cancelled', compact('data'));
 }
 }

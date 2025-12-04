@@ -15,10 +15,11 @@
                         <div
                             class="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
                             <div>
-                                <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Work Orders - Pending
+                                <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Work Orders - Cancelled
                                 </h2>
-                                <p class="text-sm text-gray-600 dark:text-neutral-400">Daftar Work Order yang sedang menunggu
-                                    tindakan.</p>
+                                <p class="text-sm text-gray-600 dark:text-neutral-400">Daftar Work Order yang telah
+                                    dibatalkan.
+                                </p>
                             </div>
 
                             <div class="flex justify-end gap-x-2">
@@ -36,6 +37,7 @@
                             </div>
                         </div>
                         <!-- End Header -->
+
 
                         <!-- Table -->
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
@@ -95,7 +97,7 @@
                                         <div class="flex items-center gap-x-2">
                                             <span
                                                 class="text-xs font-semibold uppercase text-gray-800 dark:text-neutral-200">Tgl
-                                                Diterima</span>
+                                                Dibatalkan</span>
                                         </div>
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-end">
@@ -107,10 +109,17 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                @include('work-orders.partials.status-table-rows', ['data' => $data])
+                                @include('work-orders.partials.cancelled-table-rows', ['data' => $data])
                             </tbody>
                         </table>
                         <!-- End Table -->
+
+                        <!-- Pagination -->
+                        @if ($data->hasPages())
+                            <div class="px-6 py-4 border-t border-gray-200 dark:border-neutral-700">
+                                {{ $data->links() }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

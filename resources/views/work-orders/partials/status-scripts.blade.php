@@ -1,12 +1,18 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Status update functionality
+        // Status update functionality (untuk status selain cancelled)
         document.body.addEventListener('click', function(e) {
             if (e.target.closest('.status-update-btn')) {
-                e.preventDefault();
                 const button = e.target.closest('.status-update-btn');
-                const orderId = button.getAttribute('data-order-id');
                 const newStatus = button.getAttribute('data-status');
+
+                // Jika cancelled, biarkan modal handler yang menangani
+                if (newStatus === 'cancelled') {
+                    return;
+                }
+
+                e.preventDefault();
+                const orderId = button.getAttribute('data-order-id');
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute(
                     'content');
 
@@ -17,7 +23,8 @@
                     'progress': 'Progress',
                     'revision': 'Revision',
                     'migration': 'Migration',
-                    'finish': 'Finish'
+                    'finish': 'Finish',
+                    'cancelled': 'Cancelled'
                 };
 
                 const statusName = statusNames[newStatus] || newStatus;
@@ -46,7 +53,10 @@
                     })
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            return response.json().then(data => {
+                                throw new Error(data.message ||
+                                    'Network response was not ok');
+                            });
                         }
                         return response.json();
                     })

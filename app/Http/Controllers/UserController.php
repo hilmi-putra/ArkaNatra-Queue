@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Division;
 use App\Models\DivisionModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,9 +14,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        $data = User::with(['division', 'roles'])->paginate(10);
+        $data = User::with(['division', 'roles'])->get();
         return view('users.index', compact('data'));
     }
+
 
     public function create()
     {
@@ -69,29 +71,49 @@ class UserController extends Controller
     }
 
     public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|string|exists:roles,name',
-            'id_divisi' => 'nullable|exists:table_division,id'
-        ]);
+{
+    // Validasi untuk semua field
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'role' => 'required|string|exists:roles,name',
+        'id_divisi' => 'nullable|exists:table_division,id',
+        'new_password' => 'nullable|string|min:6|max:255',
+        'admin_password' => 'required_with:new_password|string' // Hanya required jika new_password diisi
+    ]);
 
-        $updateData = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'id_divisi' => $request->id_divisi
-            // Hapus 'role' dari sini
-        ];
-
-        $user->update($updateData);
-
-        // Sync role menggunakan Spatie
-        $user->syncRoles([$request->role]);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User berhasil diupdate.');
+    // Verifikasi password admin jika ada password baru
+    if ($request->filled('new_password')) {
+        // Verifikasi password admin
+        if (!Hash::check($request->admin_password, Auth::user()->password)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Password admin salah. Verifikasi gagal.');
+        }
     }
+
+    // Persiapkan data update
+    $updateData = [
+        'name' => $request->name,
+        'email' => $request->email,
+        'id_divisi' => $request->id_divisi
+    ];
+
+    // Update user
+    $user->update($updateData);
+
+    // Sync role menggunakan Spatie
+    $user->syncRoles([$request->role]);
+
+    // Notifikasi sukses
+    $successMessage = 'User berhasil diupdate.';
+    if ($request->filled('new_password')) {
+        $successMessage .= ' Password telah diubah.';
+    }
+
+    return redirect()->route('admin.users.index')
+        ->with('success', $successMessage);
+}
 
     public function destroy(User $user)
     {

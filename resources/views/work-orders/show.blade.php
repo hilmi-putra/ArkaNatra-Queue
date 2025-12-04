@@ -27,22 +27,22 @@
 
                     @hasanyrole('asservice|production')
                         <a href="{{ route($prefix . 'work-orders.edit', $workOrder->id) }}"
-                            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z" />
+                            class="inline-flex items-center gap-x-2.5 py-2.5 px-4 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                             </svg>
                             Edit
                         </a>
                     @endhasanyrole
 
                     <a href="{{ route($prefix . 'work-orders.index') }}"
-                        class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd"
-                                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                        class="inline-flex items-center gap-x-2.5 py-2.5 px-4 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-100 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:border-neutral-600">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                         </svg>
                         Kembali
                     </a>
@@ -624,7 +624,67 @@
                                     </div>
                                 </div>
                             @endif
+
+                            <!-- Timeline 4: Selesai -->
+                            @if ($workOrder->date_cancelled)
+                                <div class="flex gap-3">
+                                    <div class="shrink-0 size-2 bg-red-600 rounded-full mt-2"></div>
+                                    <div class="grow">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">Dibatalkan</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $workOrder->date_cancelled }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
+                    </div>
+                </div>
+
+                <!-- Card: Work Order Indexing -->
+                @php
+                    $workOrderIndexing = $workOrder->workOrderIndexing()->with('indexingType')->get();
+                @endphp
+                <div
+                    class="bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-800 dark:border-neutral-700">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Kategori Indexing</h2>
+                    </div>
+                    <div class="p-6">
+                        @if ($workOrderIndexing->count() > 0)
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($workOrderIndexing as $indexing)
+                                    <div
+                                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full dark:bg-green-900 dark:text-green-300 border border-green-200 dark:border-green-700">
+                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="16"
+                                            height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path
+                                                d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
+                                        </svg>
+                                        <span
+                                            class="text-sm font-medium">{{ $indexing->indexingType->indexing_name }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @if ($workOrderIndexing->first()->description)
+                                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Deskripsi:</p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                        {{ $workOrderIndexing->first()->indexingType->description }}
+                                    </p>
+                                </div>
+                            @endif
+                        @else
+                            <div class="text-center py-6">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Tidak ada kategori indexing yang
+                                    dipilih</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

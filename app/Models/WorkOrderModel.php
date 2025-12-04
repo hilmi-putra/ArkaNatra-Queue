@@ -21,7 +21,7 @@ class WorkOrderModel extends Model
         'description', 'file_mou', 'file_work_form',
         'additional_file', 'fast_track', 'date_received',
         'date_queue', 'revision_count',
-        'date_completed', 'estimasi_date', 'sales_id', 'production_id', 'date_revision', 'date_migration'
+        'date_completed', 'estimasi_date', 'sales_id', 'production_id', 'date_revision', 'date_migration','date_cancelled',
     ];
 
     protected $dates = [
@@ -30,7 +30,8 @@ class WorkOrderModel extends Model
         'date_queue',
         'date_completed',
         'date_revision',
-        'date_migration',   
+        'date_migration',
+        'date_cancelled',   
         'created_at',
         'updated_at',
     ];
@@ -125,7 +126,10 @@ class WorkOrderModel extends Model
         return $this->formatIndonesianDate($value);
     }
 
-    // ... (relationship methods yang sudah ada)
+    public function getDateCancelledAttribute($value)
+    {
+        return $this->formatIndonesianDate($value);
+    }
 
     public function customer() 
     { 
@@ -189,5 +193,10 @@ class WorkOrderModel extends Model
     public function getCustomerNameAttribute()
     {
         return $this->customer ? $this->customer->name : null;
+    }
+
+    public function workOrderIndexing()
+    {
+        return $this->hasMany(WorkOrderIndexingModel::class, 'work_order_id');
     }
 }

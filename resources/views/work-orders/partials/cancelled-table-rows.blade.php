@@ -1,8 +1,3 @@
-@php
-    $showAntrian = $showAntrian ?? false;
-    $columnCount = $showAntrian ? 10 : 9;
-@endphp
-
 @if ($data->count() > 0)
     @foreach ($data as $order)
         <tr class="bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:hover:bg-neutral-800">
@@ -24,17 +19,6 @@
                     </span>
                 </div>
             </td>
-
-            @if ($showAntrian)
-                <!-- Antrian Ke -->
-                <td class="size-px whitespace-nowrap">
-                    <div class="px-6 py-3">
-                        <span class="text-sm text-gray-700 dark:text-neutral-300">
-                            {{ $order->antrian_ke ?? '-' }}
-                        </span>
-                    </div>
-                </td>
-            @endif
 
             <!-- Customer -->
             <td class="size-px whitespace-nowrap">
@@ -72,65 +56,19 @@
                 </div>
             </td>
 
-            <!-- Status Column with Inline Dropdown -->
+            <!-- Status -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
-                    @php
-                        $statuses = [
-                            'validate',
-                            'queue',
-                            'pending',
-                            'progress',
-                            'revision',
-                            'migration',
-                            'finish',
-                            'cancelled',
-                        ];
-                        $statusColors = [
-                            'validate' => ['bg-gray-100', 'text-gray-800'],
-                            'queue' => ['bg-blue-100', 'text-blue-800'],
-                            'pending' => ['bg-yellow-100', 'text-yellow-800'],
-                            'progress' => ['bg-indigo-100', 'text-indigo-800'],
-                            'revision' => ['bg-orange-100', 'text-orange-800'],
-                            'migration' => ['bg-purple-100', 'text-purple-800'],
-                            'finish' => ['bg-teal-100', 'text-teal-800'],
-                            'cancelled' => ['bg-red-100', 'text-red-800'],
-                        ];
-                        $currentColor = $statusColors[$order->status] ?? ['bg-gray-100', 'text-gray-800'];
-                    @endphp
-
-                    @if (auth()->user()->hasRole('production'))
-                        <div class="hs-dropdown relative inline-flex">
-                            <button id="hs-dropdown-status-{{ $order->id }}" type="button"
-                                class="hs-dropdown-toggle py-1 ps-1 pe-3 inline-flex items-center gap-x-2 text-xs font-medium rounded-full {{ $currentColor[0] }} {{ $currentColor[1] }}">
-                                <span class="py-0.5 px-2 rounded-full bg-white text-gray-800">
-                                    {{ ucfirst($order->status) }}
-                                </span>
-                                <svg class="hs-dropdown-open:rotate-180 size-2.5" width="16" height="16"
-                                    viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2 5L8.16086 10.6869C8.35239 10.8637 8.64761 10.8637 8.83914 10.6869L15 5"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            </button>
-                            <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-40 bg-white shadow-md rounded-lg p-2 mt-2 dark:bg-neutral-800 dark:border dark:border-neutral-700 dark:divide-neutral-700 after:h-4 after:absolute after:-bottom-4 after:start-0 after:w-full before:h-4 before:absolute before:-top-4 before:start-0 before:w-full z-20"
-                                aria-labelledby="hs-dropdown-status-{{ $order->id }}">
-                                @foreach ($statuses as $status)
-                                    <a class="status-update-btn flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-                                        href="#" data-order-id="{{ $order->id }}"
-                                        data-status="{{ $status }}" data-ref-id="{{ $order->ref_id }}"
-                                        data-customer="{{ $order->customer_name }}"
-                                        data-current-status="{{ $order->status }}">
-                                        {{ ucfirst($status) }}
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @else
-                        <span
-                            class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium rounded-full {{ $currentColor[0] }} {{ $currentColor[1] }}">
-                            {{ ucfirst($order->status) }}
-                        </span>
-                    @endif
+                    <span
+                        class="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400">
+                        <svg class="shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M8 12h8" />
+                        </svg>
+                        Cancelled
+                    </span>
                 </div>
             </td>
 
@@ -144,11 +82,11 @@
                 </div>
             </td>
 
-            <!-- Date Received -->
+            <!-- Date Cancelled -->
             <td class="size-px whitespace-nowrap">
                 <div class="px-6 py-3">
                     <span class="text-sm text-gray-700 dark:text-neutral-300">
-                        {{ $order->date_received ? $order->date_received : '-' }}
+                        {{ $order->date_cancelled ? $order->date_cancelled : '-' }}
                     </span>
                 </div>
             </td>
@@ -207,30 +145,14 @@
                                 <!-- Tombol Detail -->
                                 <a href="{{ route($prefix . 'work-orders.show', $order->id) }}"
                                     class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-700 w-full transition-colors duration-200">
-                                    <svg class="size-4 text-blue-600" xmlns="http://www.w3.org/2000/svg"
-                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                    <svg class="size-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" width="24"
+                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
                                     View Details
                                 </a>
-
-                                @hasanyrole('asservice|production')
-                                    <!-- Tombol Edit -->
-                                    <a href="{{ route('asservice.work-orders.edit', $order->id) }}"
-                                        class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-300 dark:hover:bg-neutral-700 w-full transition-colors duration-200">
-                                        <svg class="size-4 text-indigo-600" xmlns="http://www.w3.org/2000/svg"
-                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                        </svg>
-                                        Edit
-                                    </a>
-                                @endhasanyrole
 
                                 @role('asservice')
                                     <!-- Tombol Delete -->
@@ -262,7 +184,7 @@
     @endforeach
 @else
     <tr>
-        <td colspan="{{ $columnCount }}" class="text-center py-10">
+        <td colspan="10" class="text-center py-8">
             <div class="max-w-sm w-full min-h-100 flex flex-col justify-center mx-auto px-6 py-4">
                 <div class="flex justify-center items-center size-11 bg-gray-100 rounded-lg dark:bg-neutral-800">
                     <svg class="shrink-0 size-6 text-gray-600 dark:text-neutral-400"

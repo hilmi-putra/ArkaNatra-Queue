@@ -14,7 +14,7 @@ class AccessCredentialController extends Controller
 {
     public function index()
     {
-        $data = AccessCredentialModel::with('customer')->paginate(10);
+        $data = AccessCredentialModel::with('customer')->get();
 
         return view('access-credentials.index', compact('data'));
     }

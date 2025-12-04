@@ -439,6 +439,62 @@
                         </div>
                     </div>
 
+                    <!-- Section 2.5: Work Order Indexing -->
+                    <div class="bg-gray-50 border-l-4 border-green-500 rounded-r-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <span
+                                class="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">2½</span>
+                            <h3 class="ml-3 text-lg font-semibold text-gray-900">Kategori Indexing</h3>
+                        </div>
+
+                        <p class="text-sm text-gray-600 mb-4">Pilih satu atau lebih kategori indexing yang sesuai untuk
+                            work order ini:</p>
+
+                        @if ($indexingTypes && count($indexingTypes) > 0)
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach ($indexingTypes as $indexingType)
+                                    @php
+                                        $isChecked = false;
+                                        if (isset($workOrder)) {
+                                            $isChecked = $workOrder->workOrderIndexing->contains(
+                                                'indexing_type_id',
+                                                $indexingType->id,
+                                            );
+                                        } else {
+                                            $isChecked = in_array($indexingType->id, old('indexing_types', []));
+                                        }
+                                    @endphp
+                                    <div class="relative flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                                        onclick="document.getElementById('indexing_{{ $indexingType->id }}').click()">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" id="indexing_{{ $indexingType->id }}"
+                                                name="indexing_types[]" value="{{ $indexingType->id }}"
+                                                class="hs-checkbox-checked:bg-green-600 hs-checkbox-checked:border-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                {{ $isChecked ? 'checked' : '' }}>
+                                        </div>
+                                        <label for="indexing_{{ $indexingType->id }}"
+                                            class="ms-3 text-sm font-medium text-gray-900 cursor-pointer">
+                                            <div class="font-semibold">{{ $indexingType->indexing_name }}</div>
+                                            @if ($indexingType->description)
+                                                <div class="text-xs text-gray-500 mt-1">{{ $indexingType->description }}
+                                                </div>
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-6 bg-white border border-dashed border-gray-300 rounded-lg">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <p class="text-gray-500 text-sm">Tidak ada kategori indexing tersedia</p>
+                            </div>
+                        @endif
+                    </div>
+
                     <!-- Section 3: Work Order Details & File Upload -->
                     <div class="bg-gray-50 border-l-4 border-blue-500 rounded-r-lg p-6">
                         <div class="flex items-center mb-4">
@@ -715,7 +771,7 @@
 
                         <!-- Form Actions -->
                         <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                            <a href="{{ route('asservice.work-orders.index') }}"
+                            <a href="{{ route($prefix .'work-orders.index') }}"
                                 class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50">
                                 Cancel
                             </a>
